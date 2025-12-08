@@ -436,7 +436,8 @@
                     elevationData: null,
                     sections: [{ id: 1, speed: 25, endRatio: 1.0 }],
                     rideStatus: 'idle',
-                    currentSpeed: 0, avgSpeed: 0, movingTime: 0, rideTime: 0, distanceTraveled: 0
+                    currentSpeed: 0, avgSpeed: 0, movingTime: 0, rideTime: 0, distanceTraveled: 0,
+                    userPosition: null
                 };
                 this.listeners = [];
             }
@@ -721,6 +722,7 @@
                 this.store.update('currentSpeed', speedKmh);
                 const oldAvg = this.store.get('avgSpeed');
                 this.store.update('avgSpeed', (oldAvg + speedKmh) / 2);
+                this.store.update('userPosition', { lat: latitude, lng: longitude });
                 this.app.map.updateUserLocation(latitude, longitude, heading);
             }
         }
@@ -817,6 +819,7 @@
                 if (key === 'rideTime') document.getElementById('val-ride-time').innerText = new Date(val * 1000).toISOString().substr(11, 8);
                 if (key === 'movingTime') document.getElementById('val-move-time').innerText = new Date(val * 1000).toISOString().substr(11, 8);
                 if (key === 'elevationData') this.updateCharts(val);
+                if (key === 'userPosition') this.updateUserPositionOnChart(val);
                 if (key === 'rideStatus') {
                     const btn = document.getElementById('btn-ride-toggle');
                     const btnCancel = document.getElementById('btn-ride-cancel');
@@ -933,7 +936,13 @@
 
                 const chart = new Chart(ctx, {
                     type: 'line',
-                    data: { labels: [], datasets: [{ label: 'Elevation (m)', data: [], borderWidth: 2, pointRadius: 0, pointHoverRadius: 6, tension: 0.1, fill: true, segment: { borderColor: ctx => getSegmentColor(ctx, false), backgroundColor: ctx => getSegmentColor(ctx, true) } }] },
+                    data: { 
+                        labels: [], 
+                        datasets: [
+                            { label: 'Elevation (m)', data: [], borderWidth: 2, pointRadius: 0, pointHoverRadius: 6, tension: 0.1, fill: true, segment: { borderColor: ctx => getSegmentColor(ctx, false), backgroundColor: ctx => getSegmentColor(ctx, true) } },
+                            { label: 'Current Position', data: [], borderColor: '#ef4444', backgroundColor: '#ef4444', pointRadius: 8, pointStyle: 'circle', showLine: false }
+                        ]
+                    },
                     options: {
                         responsive: true, maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
@@ -1003,12 +1012,11 @@
             }
 
             updateCharts(data) {
-                // Update both charts
                 [this.plannerChart, this.dashboardChart].forEach(chart => {
                     if(chart) {
                         chart.data.labels = data.map((_, i) => i);
                         chart.data.datasets[0].data = data.map(d => d.elevation);
-                        // Reset view state implied? Usually yes on new data
+                        chart.data.datasets[1].data = [];
                     }
                 });
                 this.plannerViewState = { zoom: 1.0, pan: 0.0 };
@@ -1223,6 +1231,34 @@
 
                 // 7. Update Metrics
                 this.updateMetrics();
+            }
+            
+            updateUserPositionOnChart(userPos) {
+                if (!userPos || !this.dashboardChart) return;
+                
+                const elevData = this.store.get('elevationData');
+                const routeGeom = this.store.get('routeGeometry');
+                if (!elevData || !routeGeom) return;
+                
+                let closestIdx = 0;
+                let minDist = Infinity;
+                
+                elevData.forEach((point, idx) => {
+                    const dist = Math.sqrt(
+                        Math.pow(point.latitude - userPos.lat, 2) + 
+                        Math.pow(point.longitude - userPos.lng, 2)
+                    );
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closestIdx = idx;
+                    }
+                });
+                
+                const posData = new Array(elevData.length).fill(null);
+                posData[closestIdx] = elevData[closestIdx].elevation;
+                
+                this.dashboardChart.data.datasets[1].data = posData;
+                this.dashboardChart.update('none');
             }
             
             saveToFile() {
