@@ -601,13 +601,11 @@
                     this.markers.user.setLatLng(latlng);
                 }
                 
-                if (this.navigationMode) {
-                    this.map.panTo(latlng, { animate: true });
-                    if (heading !== null && heading !== undefined && !isNaN(heading)) {
-                        this.map.setBearing(-heading);
-                    }
-                } else {
-                    this.map.panTo(latlng, { animate: true, duration: 1 });
+                this.map.panTo(latlng, { animate: true });
+                
+                if (this.navigationMode && heading !== null && heading !== undefined && !isNaN(heading)) {
+                    const rotation = 360 - heading;
+                    this.map.setBearing(rotation);
                 }
             }
             
@@ -617,9 +615,7 @@
             
             disableNavigationMode() {
                 this.navigationMode = false;
-                if (this.map.setBearing) {
-                    this.map.setBearing(0);
-                }
+                this.map.setBearing(0);
             }
 
             showHoverMarker(lat, lng) {
