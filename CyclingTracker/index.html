@@ -471,7 +471,7 @@
 
         class MapService {
             constructor(containerId, store, app) {
-                this.map = L.map(containerId, { zoomControl: false, attributionControl: false }).setView([14.5995, 120.9842], 13);
+                this.map = L.map(containerId, { zoomControl: false, attributionControl: false, rotate: true, bearing: 0 }).setView([14.5995, 120.9842], 13);
                 this.store = store;
                 this.app = app;
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this.map);
@@ -595,7 +595,7 @@
             updateUserLocation(lat, lng, heading) {
                 const latlng = [lat, lng];
                 if (!this.markers.user) {
-                    this.markers.user = L.marker(latlng, { icon: this.userIcon }).addTo(this.map);
+                    this.markers.user = L.marker(latlng, { icon: this.userIcon, rotationAngle: 0 }).addTo(this.map);
                     if (this.navigationMode) this.map.setView(latlng, 17);
                 } else {
                     this.markers.user.setLatLng(latlng);
@@ -603,8 +603,8 @@
                 
                 if (this.navigationMode) {
                     this.map.panTo(latlng, { animate: true });
-                    if (heading !== null && heading !== undefined) {
-                        this.map.setBearing(-heading);
+                    if (heading !== null && heading !== undefined && !isNaN(heading)) {
+                        this.map.setBearing(heading);
                     }
                 } else {
                     this.map.panTo(latlng, { animate: true, duration: 1 });
@@ -617,7 +617,7 @@
             
             disableNavigationMode() {
                 this.navigationMode = false;
-                this.map.setBearing(0);
+                if (this.map.setBearing) this.map.setBearing(0);
             }
 
             showHoverMarker(lat, lng) {
