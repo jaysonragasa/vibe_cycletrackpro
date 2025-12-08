@@ -604,7 +604,7 @@
                 if (this.navigationMode) {
                     this.map.panTo(latlng, { animate: true });
                     if (heading !== null && heading !== undefined && !isNaN(heading)) {
-                        this.map.setBearing(heading);
+                        this.map.setBearing(-heading);
                     }
                 } else {
                     this.map.panTo(latlng, { animate: true, duration: 1 });
@@ -617,7 +617,9 @@
             
             disableNavigationMode() {
                 this.navigationMode = false;
-                if (this.map.setBearing) this.map.setBearing(0);
+                if (this.map.setBearing) {
+                    this.map.setBearing(0);
+                }
             }
 
             showHoverMarker(lat, lng) {
@@ -718,12 +720,12 @@
             }
             pause() { this.store.update('rideStatus', 'paused'); clearInterval(this.timerId); }
             processPosition(pos) {
-                const { latitude, longitude, speed } = pos.coords;
+                const { latitude, longitude, speed, heading } = pos.coords;
                 const speedKmh = (speed || 0) * 3.6;
                 this.store.update('currentSpeed', speedKmh);
                 const oldAvg = this.store.get('avgSpeed');
                 this.store.update('avgSpeed', (oldAvg + speedKmh) / 2);
-                this.app.map.updateUserLocation(latitude, longitude, pos.coords.heading);
+                this.app.map.updateUserLocation(latitude, longitude, heading);
             }
         }
 
