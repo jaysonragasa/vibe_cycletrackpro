@@ -479,6 +479,7 @@
                 this.routeLayer = null;
                 this.segmentGroup = L.featureGroup().addTo(this.map);
                 this.highlightLayer = null;
+                this.navigationMode = false;
 
                 const baseIconHtml = (color) => `<div style='background-color:${color}; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);'></div>`;
                 this.userIcon = L.divIcon({ className: 'custom-div-icon', html: baseIconHtml('#3b82f6'), iconSize: [20, 20], iconAnchor: [10, 10] });
@@ -592,9 +593,30 @@
 
             updateUserLocation(lat, lng, heading) {
                 const latlng = [lat, lng];
-                if (!this.markers.user) this.markers.user = L.marker(latlng, { icon: this.userIcon }).addTo(this.map);
-                else this.markers.user.setLatLng(latlng);
-                this.map.panTo(latlng, { animate: true, duration: 1 });
+                if (!this.markers.user) {
+                    this.markers.user = L.marker(latlng, { icon: this.userIcon }).addTo(this.map);
+                    if (this.navigationMode) this.map.setView(latlng, 17);
+                } else {
+                    this.markers.user.setLatLng(latlng);
+                }
+                
+                if (this.navigationMode) {
+                    this.map.panTo(latlng, { animate: true });
+                    if (heading !== null && heading !== undefined) {
+                        this.map.getContainer().style.transform = `rotate(${-heading}deg)`;
+                    }
+                } else {
+                    this.map.panTo(latlng, { animate: true, duration: 1 });
+                }
+            }
+            
+            enableNavigationMode() {
+                this.navigationMode = true;
+            }
+            
+            disableNavigationMode() {
+                this.navigationMode = false;
+                this.map.getContainer().style.transform = 'rotate(0deg)';
             }
 
             showHoverMarker(lat, lng) {
@@ -677,10 +699,12 @@
                 if (this.watchId) navigator.geolocation.clearWatch(this.watchId);
                 if (this.timerId) clearInterval(this.timerId);
                 this.watchId = null; this.timerId = null;
+                this.app.map.disableNavigationMode();
             }
             start() {
                 this.store.update('rideStatus', 'active');
                 this.lastTime = Date.now();
+                this.app.map.enableNavigationMode();
                 if ('geolocation' in navigator) {
                     this.watchId = navigator.geolocation.watchPosition(pos => this.processPosition(pos), err => console.error(err), { enableHighAccuracy: true });
                 }
