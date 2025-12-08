@@ -306,7 +306,6 @@
             </div>
 
             <div class="p-2 overflow-y-auto custom-scrollbar flex-1 h-32">
-                <!-- Changed from no-scrollbar to custom-scrollbar -->
                 <div id="sections-container" class="space-y-2"></div>
                 <button id="btn-add-section" class="mt-3 w-full py-2 border border-dashed border-gray-500 text-gray-400 rounded-lg text-xs hover:text-white hover:border-white transition-colors">
                     + Add Split Segment
@@ -567,7 +566,7 @@
             }
 
             showHoverMarker(lat, lng) {
-                if (!lat || !lng) return;
+                if(!lat || !lng) return;
                 if (!this.markers.hover) this.markers.hover = L.marker([lat, lng], { icon: this.hoverIcon }).addTo(this.map);
                 else this.markers.hover.setLatLng([lat, lng]);
             }
@@ -581,8 +580,8 @@
                 try {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`);
                     const data = await res.json();
-                    if (data && data.display_name) address = data.display_name;
-                } catch (err) { console.error(err); }
+                    if(data && data.display_name) address = data.display_name;
+                } catch(err) { console.error(err); }
                 return { lat: latlng.lat, lng: latlng.lng, address: address };
             }
 
@@ -675,11 +674,12 @@
             constructor(app) {
                 this.app = app; this.store = app.store;
                 this.panels = { planner: document.getElementById('panel-planner'), advanced: document.getElementById('panel-advanced'), dashboard: document.getElementById('panel-dashboard') };
-                this.activePanel = null; this.plannerChart = null; this.dashboardChart = null;
+                this.activePanel = null;
+                this.plannerChart = null; this.dashboardChart = null; // Charts initialized later
                 this.plannerViewState = { zoom: 1.0, pan: 0.0 }; this.dashboardViewState = { zoom: 1.0, pan: 0.0 };
                 this.modalCallback = null;
                 this.store.subscribe((key, val) => this.renderUpdate(key, val));
-                this.initCharts();
+                this.initCharts(); // Corrected method name
             }
 
             showLoading(msg) {
@@ -787,11 +787,11 @@
                     const div = document.createElement('div');
                     div.className = "relative waypoint-item";
                     div.innerHTML = `
-                            <i class="fas fa-map-marker absolute left-3 top-3 text-blue-400 text-xs"></i>
-                            <input type="text" id="input-wp-${idx}" value="${wp.address || ''}" placeholder="Stop ${idx + 1}" class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 pl-10 pr-8 focus:border-blue-500 focus:outline-none text-sm">
-                            <button onclick="app.ui.removeWaypoint(${idx})" class="absolute right-2 top-2 text-gray-500 hover:text-red-500 p-1"><i class="fas fa-times"></i></button>
-                            <ul id="suggestions-wp-${idx}" class="hidden absolute z-50 w-full bg-gray-800 border border-gray-600 mt-1 rounded-md shadow-lg max-h-40 overflow-auto"></ul>
-                        `;
+                        <i class="fas fa-map-marker absolute left-3 top-3 text-blue-400 text-xs"></i>
+                        <input type="text" id="input-wp-${idx}" value="${wp.address || ''}" placeholder="Stop ${idx + 1}" class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 pl-10 pr-8 focus:border-blue-500 focus:outline-none text-sm">
+                        <button onclick="app.ui.removeWaypoint(${idx})" class="absolute right-2 top-2 text-gray-500 hover:text-red-500 p-1"><i class="fas fa-times"></i></button>
+                        <ul id="suggestions-wp-${idx}" class="hidden absolute z-50 w-full bg-gray-800 border border-gray-600 mt-1 rounded-md shadow-lg max-h-40 overflow-auto"></ul>
+                    `;
                     container.appendChild(div);
                     this.app.setupAutocomplete(`input-wp-${idx}`, `suggestions-wp-${idx}`, `waypoint-${idx}`);
                 });
@@ -807,7 +807,7 @@
             removeWaypoint(idx) {
                 const wps = this.store.get('waypoints');
                 const mapMarkers = this.app.map.markers.waypoints;
-                if (mapMarkers[idx]) {
+                if(mapMarkers[idx]) {
                     this.app.map.map.removeLayer(mapMarkers[idx]);
                     mapMarkers.splice(idx, 1);
                 }
@@ -815,9 +815,9 @@
                 wps.splice(idx, 1);
                 this.store.update('waypoints', wps);
                 this.app.map.clearWaypoints();
-                wps.forEach((wp, i) => { if (wp.lat && wp.lng) this.app.map.addMarker('waypoint', wp, i); });
+                wps.forEach((wp, i) => { if(wp.lat && wp.lng) this.app.map.addMarker('waypoint', wp, i); });
 
-                if (this.store.get('startPoint') && this.store.get('endPoint')) this.triggerRouteCalc();
+                if(this.store.get('startPoint') && this.store.get('endPoint')) this.triggerRouteCalc();
             }
 
             async triggerRouteCalc() {
@@ -828,7 +828,7 @@
                 const btn = document.getElementById('btn-calc-route');
                 const btnNext = document.getElementById('btn-next-step');
 
-                if (s && e) {
+                if(s && e) {
                     btn.innerText = "Calculating...";
                     btn.disabled = true;
                     btnNext.classList.add('hidden');
@@ -843,7 +843,7 @@
 
                         this.store.update('sections', [{ id: 1, speed: 25, endRatio: 1.0 }]);
                         this.renderSections();
-                    } catch (err) {
+                    } catch(err) {
                         console.error(err);
                         this.showToast("Error: " + err.message);
                         btn.innerText = "Check Route";
@@ -853,8 +853,7 @@
             }
 
             initCharts() {
-                this.plannerChart = this.createChart('elevationChartPlanner', 'plannerViewState', 'chk-show-segment'); // Planner Chart (No checkbox ID passed if handled internally or N/A)
-                // Actually the planner doesn't have the checkbox, so handled implicitly
+                this.plannerChart = this.createChart('elevationChartPlanner', 'plannerViewState');
                 this.dashboardChart = this.createChart('elevationChartDashboard', 'dashboardViewState', 'chk-show-segment');
 
                 this.setupChartControls('btn-plan-', 'plannerViewState', this.plannerChart);
@@ -872,7 +871,7 @@
                     const totalPoints = ctx.chart.data.labels.length;
                     const idx = ctx.p0DataIndex; const ratio = idx / totalPoints;
                     let secIdx = 0;
-                    for (let i = 0; i < sections.length; i++) { if (ratio <= sections[i].endRatio) { secIdx = i; break; } }
+                    for(let i=0; i<sections.length; i++) { if(ratio <= sections[i].endRatio) { secIdx = i; break; } }
                     const hexColor = SEGMENT_COLORS[secIdx % SEGMENT_COLORS.length];
                     return isBackground ? hexColor + '40' : hexColor;
                 };
@@ -900,12 +899,12 @@
                 const moveDrag = (x) => {
                     if (!isDragging) return;
                     const w = canvas.width || canvas.clientWidth;
-                    if (w) this.panChart(chart, this[viewStateKey], ((lastX - x) / w) * 2, checkboxId);
+                    if(w) this.panChart(chart, this[viewStateKey], ((lastX - x) / w) * 2, checkboxId);
                     lastX = x;
                 };
                 const endDrag = () => { isDragging = false; canvas.style.cursor = 'default'; };
                 canvas.addEventListener('mousedown', e => startDrag(e.clientX)); canvas.addEventListener('mousemove', e => moveDrag(e.clientX)); canvas.addEventListener('mouseup', endDrag); canvas.addEventListener('mouseleave', endDrag);
-                canvas.addEventListener('touchstart', e => startDrag(e.touches[0].clientX), { passive: true }); canvas.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX), { passive: true }); canvas.addEventListener('touchend', endDrag);
+                canvas.addEventListener('touchstart', e => startDrag(e.touches[0].clientX), {passive: true}); canvas.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX), {passive: true}); canvas.addEventListener('touchend', endDrag);
 
                 return chart;
             }
@@ -918,7 +917,7 @@
                 document.getElementById(prefix + 'pan-left').onclick = () => this.panChart(chart, this[viewStateKey], -0.1, checkboxId);
                 document.getElementById(prefix + 'pan-right').onclick = () => this.panChart(chart, this[viewStateKey], 0.1, checkboxId);
 
-                if (checkboxId && document.getElementById(checkboxId)) {
+                if(checkboxId && document.getElementById(checkboxId)) {
                     document.getElementById(checkboxId).onchange = () => this.updateChartAxis(chart, this[viewStateKey], checkboxId);
                 }
             }
@@ -934,7 +933,7 @@
             }
 
             updateChartAxis(chart, viewState, checkboxId) {
-                if (!chart) return;
+                if(!chart) return;
                 const len = chart.data.labels.length; if (len === 0) return;
                 const win = Math.floor(len * viewState.zoom); const start = Math.floor(viewState.pan * (len - win));
                 chart.options.scales.x.min = start; chart.options.scales.x.max = start + win;
@@ -951,7 +950,7 @@
             updateCharts(data) {
                 // Update both charts
                 [this.plannerChart, this.dashboardChart].forEach(chart => {
-                    if (chart) {
+                    if(chart) {
                         chart.data.labels = data.map((_, i) => i);
                         chart.data.datasets[0].data = data.map(d => d.elevation);
                         // Reset view state implied? Usually yes on new data
@@ -968,8 +967,8 @@
                 const totalHours = this.calculateTotalHours();
                 const now = new Date(); now.setSeconds(now.getSeconds() + (totalHours * 3600));
                 const h = Math.floor(totalHours); const m = Math.round((totalHours - h) * 60);
-                document.getElementById('val-ett').innerText = `${h}h ${m.toString().padStart(2, '0')}m`;
-                document.getElementById('val-eta').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('val-ett').innerText = `${h}h ${m.toString().padStart(2,'0')}m`;
+                document.getElementById('val-eta').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             }
 
             calculateTotalHours() {
@@ -978,11 +977,28 @@
                 const sections = this.store.get('sections');
                 let totalHours = 0;
                 sections.forEach((s, idx) => {
-                    const prevEnd = idx === 0 ? 0 : sections[idx - 1].endRatio;
+                    const prevEnd = idx === 0 ? 0 : sections[idx-1].endRatio;
                     const segmentDistKm = distKm * (s.endRatio - prevEnd);
                     totalHours += segmentDistKm / s.speed;
                 });
                 return totalHours;
+            }
+
+            updateMetrics() {
+                const totalHours = this.calculateTotalHours();
+                const totalDist = this.store.get('distanceTraveled') || 0;
+                const h = Math.floor(totalHours);
+                const m = Math.round((totalHours - h) * 60);
+                const now = new Date();
+                now.setMinutes(now.getMinutes() + Math.round(totalHours * 60));
+
+                const distEl = document.getElementById('adv-total-dist');
+                const timeEl = document.getElementById('adv-total-time');
+                const etaEl = document.getElementById('adv-eta');
+
+                if (distEl) distEl.innerText = (totalDist / 1000).toFixed(1) + " km";
+                if (timeEl) timeEl.innerText = `${h}h ${m.toString().padStart(2,'0')}m`;
+                if (etaEl) etaEl.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             }
 
             renderSections() {
@@ -991,16 +1007,7 @@
                 const totalDist = this.store.get('distanceTraveled') || 0;
 
                 // 1. Calculate Metrics
-                const totalHours = this.calculateTotalHours();
-                const totalMins = Math.round(totalHours * 60);
-                const h = Math.floor(totalMins / 60);
-                const m = totalMins % 60;
-                const now = new Date();
-                now.setMinutes(now.getMinutes() + totalMins);
-
-                document.getElementById('adv-total-dist').innerText = (totalDist / 1000).toFixed(1) + " km";
-                document.getElementById('adv-total-time').innerText = `${h}h ${m.toString().padStart(2, '0')}m`;
-                document.getElementById('adv-eta').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                this.updateMetrics();
 
                 // 2. Render Cards
                 container.innerHTML = sections.map((s, idx) => {
@@ -1028,53 +1035,53 @@
                     const canDelete = sections.length > 1;
 
                     return `
-                        <div class="bg-gray-800 p-2 rounded-lg border-l-4 transition-colors hover:border-gray-500 relative" style="border-left-color: ${color}; border-top:1px solid #374151; border-right:1px solid #374151; border-bottom:1px solid #374151;">
-                            <div class="flex justify-between items-center mb-1">
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-bold text-gray-200">Segment ${idx + 1}</span>
-                                        <span class="text-[10px] bg-gray-700 px-1 rounded text-gray-400 border border-gray-600 font-mono">
-                                            <span id="txt-start-${idx}">${startKm}</span> - <span id="txt-end-${idx}">${endKm}</span>km
-                                        </span>
-                                    </div>
-                                </div>
+                    <div class="bg-gray-800 p-2 rounded-lg border-l-4 transition-colors hover:border-gray-500 relative" style="border-left-color: ${color}; border-top:1px solid #374151; border-right:1px solid #374151; border-bottom:1px solid #374151;">
+                        <div class="flex justify-between items-center mb-1">
+                            <div>
                                 <div class="flex items-center gap-2">
-                                    ${canDelete ? `
-                                    <button onclick="app.ui.removeSegment(${idx})" class="text-gray-500 hover:text-red-500 transition-colors p-1" title="Remove Segment">
-                                        <i class="fas fa-trash-alt text-[10px]"></i>
-                                    </button>
-                                    ` : ''}
-                                    <div class="w-2 h-2 rounded-full shadow-sm" style="background-color: ${color}"></div>
+                                    <span class="text-xs font-bold text-gray-200">Segment ${idx + 1}</span>
+                                    <span class="text-[10px] bg-gray-700 px-1 rounded text-gray-400 border border-gray-600 font-mono">
+                                        <span id="txt-start-${idx}">${startKm}</span> - <span id="txt-end-${idx}">${endKm}</span>km
+                                    </span>
                                 </div>
                             </div>
+                            <div class="flex items-center gap-2">
+                                ${canDelete ? `
+                                <button onclick="app.ui.removeSegment(${idx})" class="text-gray-500 hover:text-red-500 transition-colors p-1" title="Remove Segment">
+                                    <i class="fas fa-trash-alt text-[10px]"></i>
+                                </button>
+                                ` : ''}
+                                <div class="w-2 h-2 rounded-full shadow-sm" style="background-color: ${color}"></div>
+                            </div>
+                        </div>
 
-                            <div class="space-y-2">
-                                <div class="px-1">
-                                    <div class="range-slider-wrapper">
-                                        <div class="range-slider-track"></div>
-                                        <div id="highlight-${idx}" class="range-slider-highlight" style="left: ${leftPercent}%; width: ${widthPercent}%; background-color: ${color}"></div>
+                        <div class="space-y-2">
+                            <div class="px-1">
+                                <div class="range-slider-wrapper">
+                                    <div class="range-slider-track"></div>
+                                    <div id="highlight-${idx}" class="range-slider-highlight" style="left: ${leftPercent}%; width: ${widthPercent}%; background-color: ${color}"></div>
 
-                                        <!-- Left Handle (Start): Controls boundary at idx-1 -->
-                                        <input type="range" step="0.001" min="0" max="1" value="${prevEndRatio}" id="slider-start-${idx}" oninput="app.ui.updateBoundary(${idx - 1}, this.value, true)" onchange="app.ui.renderSections()" class="range-input ${isFirst ? 'locked' : ''}" ${isFirst ? 'disabled' : ''}>
+                                    <!-- Left Handle (Start): Controls boundary at idx-1 -->
+                                    <input type="range" step="0.001" min="0" max="1" value="${prevEndRatio}" id="slider-start-${idx}" oninput="app.ui.updateBoundary(${idx-1}, this.value, true)" onchange="app.ui.renderSections()" class="range-input ${isFirst ? 'locked' : ''}" ${isFirst ? 'disabled' : ''}>
 
-                                        <!-- Right Handle (End): Controls boundary at idx -->
-                                        <input type="range" step="0.001" min="0" max="1" value="${currentEndRatio}" id="slider-end-${idx}" oninput="app.ui.updateBoundary(${idx}, this.value, false)" onchange="app.ui.renderSections()" class="range-input ${isLast ? 'locked' : ''}" ${isLast ? 'disabled' : ''}>
-                                    </div>
-                                        <input type="range" step="0.001" min="0" max="1" value="${s.endRatio}" id="slider-end-${idx}" oninput="app.ui.updateBoundary(${idx}, this.value)" onchange="app.ui.renderSections()" class="range-input ${isLast ? 'locked' : ''}" ${isLast ? 'disabled' : ''}>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2 p-1 bg-gray-900/50 rounded border border-gray-700/50">
-                                    <span class="text-[10px] font-semibold text-gray-400 whitespace-nowrap">Target Ave. Speed</span>
-                                    <input type="range" min="10" max="60" value="${s.speed}" oninput="document.getElementById('lbl-speed-${idx}').innerText = this.value; app.ui.updateSectionSpeed(${idx}, this.value)" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer speed-slider" style="accent-color: ${color}">
-                                    <span class="text-[10px] font-mono text-white whitespace-nowrap w-12 text-right"><span id="lbl-speed-${idx}">${s.speed}</span> km/h</span>
+                                    <!-- Right Handle (End): Controls boundary at idx -->
+                                    <input type="range" step="0.001" min="0" max="1" value="${currentEndRatio}" id="slider-end-${idx}" oninput="app.ui.updateBoundary(${idx}, this.value, false)" onchange="app.ui.renderSections()" class="range-input ${isLast ? 'locked' : ''}" ${isLast ? 'disabled' : ''}>
                                 </div>
                             </div>
-                        </div>`;
+                            <div class="flex items-center gap-2 p-1 bg-gray-900/50 rounded border border-gray-700/50">
+                                <span class="text-[10px] font-semibold text-gray-400 whitespace-nowrap">Target Ave. Speed</span>
+                                <input type="range" min="10" max="60" value="${s.speed}" oninput="document.getElementById('lbl-speed-${idx}').innerText = this.value; app.ui.updateSectionSpeed(${idx}, this.value)" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer speed-slider" style="accent-color: ${color}">
+                                <span class="text-[10px] font-mono text-white whitespace-nowrap w-12 text-right"><span id="lbl-speed-${idx}">${s.speed}</span> km/h</span>
+                            </div>
+                        </div>
+                    </div>`;
                 }).join('');
+
+                // 3. Update Map - Use injected dependency
                 this.app.map.drawSegments(sections);
                 // 4. Update Chart Colors if open
-                if (this.plannerChart) this.plannerChart.update();
-                if (this.dashboardChart) this.dashboardChart.update();
+                if(this.plannerChart) this.plannerChart.update();
+                if(this.dashboardChart) this.dashboardChart.update();
             }
 
             removeSegment(idx) {
@@ -1095,7 +1102,8 @@
                 const sections = this.store.get('sections');
                 sections[idx].speed = parseInt(speed);
                 this.store.update('sections', sections);
-                this.renderSections(); // Re-calc metrics
+                // Optimized: Update metrics without full DOM re-render
+                this.updateMetrics();
             }
 
             updateBoundary(boundaryIndex, newVal, isStartSlider) {
@@ -1117,15 +1125,15 @@
                 const kmVal = ((ratio * totalDist) / 1000).toFixed(1);
 
                 // --- 3. Update UI Elements ---
-                if (document.getElementById(`txt-start-${boundaryIndex + 1}`)) document.getElementById(`txt-start-${boundaryIndex + 1}`).innerText = kmVal;
-                if (document.getElementById(`txt-end-${boundaryIndex}`)) document.getElementById(`txt-end-${boundaryIndex}`).innerText = kmVal;
+                if(document.getElementById(`txt-start-${boundaryIndex + 1}`)) document.getElementById(`txt-start-${boundaryIndex + 1}`).innerText = kmVal;
+                if(document.getElementById(`txt-end-${boundaryIndex}`)) document.getElementById(`txt-end-${boundaryIndex}`).innerText = kmVal;
 
                 // Force the input elements to match clamped value (prevents dragging past limit)
                 const endHandle = document.getElementById(`slider-end-${boundaryIndex}`);
-                if (endHandle) endHandle.value = clampedVal;
+                if(endHandle) endHandle.value = clampedVal;
 
                 const startHandle = document.getElementById(`slider-start-${boundaryIndex + 1}`);
-                if (startHandle) startHandle.value = clampedVal;
+                if(startHandle) startHandle.value = clampedVal;
 
                 // --- 4. Update Highlight Bars ---
                 // Current Segment (Expanding/Shrinking End)
@@ -1134,7 +1142,7 @@
                 const width1 = (ratio - prevEndRatio) * 100;
 
                 const bar1 = document.getElementById(`highlight-${boundaryIndex}`);
-                if (bar1) {
+                if(bar1) {
                     bar1.style.left = `${left1}%`;
                     bar1.style.width = `${width1}%`;
                 }
@@ -1146,17 +1154,20 @@
                     const width2 = (nextEndRatio - ratio) * 100;
 
                     const bar2 = document.getElementById(`highlight-${boundaryIndex + 1}`);
-                    if (bar2) {
+                    if(bar2) {
                         bar2.style.left = `${left2}%`;
                         bar2.style.width = `${width2}%`;
                     }
                 }
 
                 // 5. Update Chart Colors on drag (optional, but nice)
-                if (this.plannerChart) this.plannerChart.update('none'); // 'none' mode for performance
+                if(this.plannerChart) this.plannerChart.update('none'); // 'none' mode for performance
 
                 // 6. Update Map Real-time
                 this.app.map.drawSegments(sections);
+
+                // 7. Update Metrics
+                this.updateMetrics();
             }
         }
 
@@ -1212,14 +1223,14 @@
 
                             // Calculate simple distance (Euclidean approximation for speed, can be improved with Haversine)
                             let dist = 0;
-                            for (let i = 0; i < latlngs.length - 1; i++) {
-                                dist += this.map.map.distance(latlngs[i], latlngs[i + 1]);
+                            for(let i=0; i<latlngs.length-1; i++) {
+                                dist += this.map.map.distance(latlngs[i], latlngs[i+1]);
                             }
                             this.store.update('distanceTraveled', dist); // meters
 
                             // Set Start/End
                             const start = { lat: latlngs[0][0], lng: latlngs[0][1] };
-                            const end = { lat: latlngs[latlngs.length - 1][0], lng: latlngs[latlngs.length - 1][1] };
+                            const end = { lat: latlngs[latlngs.length-1][0], lng: latlngs[latlngs.length-1][1] };
 
                             // Resolve Addresses
                             this.ui.showLoading("Resolving Addresses...");
@@ -1264,8 +1275,8 @@
                         const input = settingStart ? 'input-start' : 'input-end';
                         document.getElementById(input).value = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
                         this.map.addMarker(settingStart ? 'start' : 'end', e.latlng);
-                        if (settingStart) this.store.update('startPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
-                        else this.store.update('endPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
+                        if(settingStart) this.store.update('startPoint', {lat: e.latlng.lat, lng: e.latlng.lng});
+                        else this.store.update('endPoint', {lat: e.latlng.lat, lng: e.latlng.lng});
                         settingStart = !settingStart;
                     }
                 });
@@ -1289,7 +1300,7 @@
 
                         this.store.update('sections', [{ id: 1, speed: 25, endRatio: 1.0 }]);
                         this.ui.renderSections();
-                    } catch (err) {
+                    } catch(err) {
                         this.ui.showModal({ title: 'Error', message: "Could not find route. " + err.message, type: 'alert' });
                         document.getElementById('btn-calc-route').innerText = "Check Route";
                     }
@@ -1312,7 +1323,7 @@
                 document.getElementById('btn-ride-toggle').onclick = () => this.ride.toggleRide();
                 document.getElementById('btn-ride-cancel').onclick = () => {
                     const status = this.store.get('rideStatus');
-                    if (status === 'idle') this.ui.showModal({ title: 'Discard?', message: 'Discard plan?', type: 'confirm', onConfirm: () => this.ui.togglePanel('planner') });
+                    if(status === 'idle') this.ui.showModal({ title: 'Discard?', message: 'Discard plan?', type: 'confirm', onConfirm: () => this.ui.togglePanel('planner') });
                     else this.ui.showModal({ title: 'Finish?', message: 'Stop ride?', type: 'confirm', confirmText: 'Stop', onConfirm: () => { this.ride.stopRide(); this.ui.togglePanel('planner'); } });
                 };
                 document.getElementById('btn-fullscreen').onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else if (document.exitFullscreen) document.exitFullscreen(); };
@@ -1342,15 +1353,15 @@
                                     list.classList.add('hidden');
                                     const lat = parseFloat(place.lat); const lng = parseFloat(place.lon);
 
-                                    if (stateKey.startsWith('waypoint-')) {
+                                    if(stateKey.startsWith('waypoint-')) {
                                         const idx = parseInt(stateKey.split('-')[1]);
                                         const wps = [...this.store.get('waypoints')];
-                                        wps[idx] = { lat, lng, address: place.display_name };
+                                        wps[idx] = {lat, lng, address: place.display_name};
                                         this.store.update('waypoints', wps);
-                                        this.map.addMarker('waypoint', { lat, lng }, idx);
+                                        this.map.addMarker('waypoint', {lat, lng}, idx);
                                     } else {
-                                        this.map.addMarker(stateKey === 'startPoint' ? 'start' : 'end', { lat, lng });
-                                        this.store.update(stateKey, { lat, lng, address: place.display_name });
+                                        this.map.addMarker(stateKey === 'startPoint' ? 'start' : 'end', {lat, lng});
+                                        this.store.update(stateKey, {lat, lng, address: place.display_name});
                                     }
                                     this.map.map.panTo([lat, lng]);
                                 };
