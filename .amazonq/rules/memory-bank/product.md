@@ -14,20 +14,25 @@ CycleTrack Pro is a mobile-first web application designed for cyclists to plan, 
 
 ### Route Planning
 - Point A to Point B route calculation using OpenStreetMap and OSRM routing
-- Address autocomplete with geocoding suggestions
+- Address autocomplete with geocoding suggestions (500ms debounce)
 - Interactive map-based point selection (tap/click to set start and end points)
-- Multiple waypoint support for complex routes
-- Draggable markers for real-time route adjustments
-- GPX file import for pre-planned routes
-- Click-on-route to add waypoints dynamically
-- Automatic route visualization with elevation data
+- Multiple waypoint support for complex routes with add/remove functionality
+- Draggable markers for real-time route adjustments with automatic segment reset
+- GPX file import for pre-planned routes with full parsing and elevation fetching
+- Click-on-route to add waypoints dynamically with automatic rerouting
+- Automatic route visualization with elevation data (500 sample points)
+- Toast notifications for user feedback during route operations
 
 ### Advanced Speed Planning
-- Segment-based speed planning with visual color coding
+- Segment-based speed planning with visual color coding (8 distinct colors)
 - Adjustable speed targets (10-60 km/h) for each route segment
-- Dual-slider interface for precise segment boundary control
-- Real-time ETA calculation based on planned speeds
-- Add/remove segments dynamically to customize planning
+- Dual-slider interface for precise segment boundary control with clamping logic
+- Real-time ETA and ETT calculation based on planned speeds
+- Add/remove segments dynamically to customize planning (minimum 1 segment)
+- Segment boundaries constrained to prevent overlap
+- Real-time visual feedback with colored highlight bars
+- Automatic segment adjustment when boundaries are modified
+- Distance display for each segment in kilometers
 
 ### Live Ride Dashboard
 - Current speed and average speed monitoring
@@ -42,15 +47,17 @@ CycleTrack Pro is a mobile-first web application designed for cyclists to plan, 
 - Start/Pause/Resume/Stop ride controls
 
 ### Elevation Profile
-- Dual charts: Planner view and Dashboard view with independent controls
-- Color-coded segments matching route planner configuration
-- Interactive graph with hover-to-map synchronization
-- Zoom in/out functionality for detailed elevation analysis
-- Pan left/right when zoomed for precise navigation
-- Reset view button to restore default zoom/pan
-- Touch and mouse gesture support (drag to pan)
+- Dual charts: Planner view and Dashboard view with independent view states
+- Color-coded segments matching route planner configuration (segment-based coloring)
+- Interactive graph with hover-to-map synchronization (shows hover marker)
+- Zoom in/out functionality for detailed elevation analysis (0.05x to 1.0x zoom)
+- Pan left/right when zoomed for precise navigation (constrained panning)
+- Reset view button to restore default zoom/pan (1.0 zoom, 0.0 pan)
+- Touch and mouse gesture support (drag to pan on canvas)
 - Real-time position marker during active rides
-- Optional segment highlighting on map (dashboard only)
+- Optional segment highlighting on map (dashboard only, checkbox-controlled)
+- Chart updates use performance mode ('none') for smooth interactions
+- Independent zoom/pan state management for each chart
 
 ### User Experience
 - Collapsible floating panels with circular button indicators

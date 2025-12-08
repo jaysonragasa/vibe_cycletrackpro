@@ -38,11 +38,12 @@ The application is structured around six main classes that follow separation of 
 #### 2. MapService (Map Rendering & Interaction)
 - Manages Leaflet map instance and all map-related operations
 - Handles marker placement (start, end, waypoints, user location, hover)
-- Draggable markers with automatic rerouting on drag-end
-- Click-on-route to add waypoints dynamically
+- Draggable markers with automatic rerouting on drag-end and segment reset
+- Click-on-route to add waypoints dynamically with automatic rerouting
 - Draws routes and colored segments on the map
-- Provides route highlighting for graph interactions
+- Provides route highlighting for graph interactions (dashboard only)
 - Updates user location during active rides
+- Shows toast notifications during marker drag operations
 
 #### 3. RouteService (External API Integration)
 - Geocoding via Nominatim API (OpenStreetMap)
@@ -54,22 +55,25 @@ The application is structured around six main classes that follow separation of 
 
 #### 4. RideManager (Ride Tracking Logic)
 - Manages ride lifecycle (start, pause, resume, stop)
-- Integrates with browser Geolocation API
-- Calculates moving time vs ride time
-- Updates speed metrics in real-time
-- Controls timer intervals for time tracking
+- Integrates with browser Geolocation API with high accuracy
+- Calculates moving time vs ride time (moving threshold: 2 km/h)
+- Updates speed metrics in real-time (current and average)
+- Controls timer intervals for time tracking (1 second intervals)
+- Processes geolocation position updates with speed conversion
 
 #### 5. UIManager (User Interface Controller)
-- Manages panel visibility and transitions
+- Manages panel visibility and transitions (planner, advanced, dashboard)
 - Renders dynamic UI elements (sections, metrics, waypoints)
-- Handles dual Chart.js elevation graphs (planner and dashboard)
+- Handles dual Chart.js elevation graphs (planner and dashboard) with independent view states
 - Implements independent zoom/pan/reset controls for each graph
-- Calculates and displays ETA and ETT
-- Manages segment creation/deletion/modification
-- Custom modal system for alerts and confirmations
-- Toast notification system
-- Loading overlay with status messages
-- Waypoint management (add, remove, render)
+- Calculates and displays ETA and ETT based on segment speeds
+- Manages segment creation/deletion/modification with dual-slider interface
+- Custom modal system for alerts and confirmations (two types: alert and confirm)
+- Toast notification system with auto-dismiss and fade animations
+- Loading overlay with status messages for async operations
+- Waypoint management (add, remove, render) with autocomplete
+- Real-time boundary updates with clamping logic for segment sliders
+- Optional segment highlighting on map (dashboard chart only, checkbox-controlled)
 
 #### 6. App (Main Orchestrator)
 - Initializes all services with dependency injection

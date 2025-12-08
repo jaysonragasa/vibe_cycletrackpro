@@ -418,14 +418,22 @@ class RouteService { }
 - UI updates are reactive to state changes
 
 ### Manual Testing Checklist
-1. Route planning with valid addresses
-2. Map-based point selection
-3. Segment creation and deletion
-4. Speed adjustment and ETA calculation
-5. Ride start/pause/stop functionality
-6. Elevation graph zoom and pan
-7. Mobile touch gestures
-8. Fullscreen mode
+1. Route planning with valid addresses and autocomplete
+2. Map-based point selection (alternating start/end)
+3. Waypoint addition and removal with rerouting
+4. GPX file upload and parsing
+5. Segment creation and deletion (minimum 1 segment enforced)
+6. Speed adjustment and ETA/ETT calculation
+7. Dual-slider boundary adjustment with clamping
+8. Ride start/pause/resume/stop functionality
+9. Elevation graph zoom and pan (both charts independently)
+10. Segment highlighting on map (dashboard checkbox)
+11. Mobile touch gestures (drag to pan on charts)
+12. Fullscreen mode toggle
+13. Draggable markers with automatic rerouting
+14. Click-on-route to add waypoints
+15. Toast notifications and modal dialogs
+16. Loading overlay during async operations
 
 ## UI/UX Enhancement Patterns
 

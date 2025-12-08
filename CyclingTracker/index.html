@@ -210,10 +210,20 @@
 
     <!-- Top Controls -->
     <div class="absolute top-4 right-4 z-[1000] flex gap-2">
-        <button id="btn-fullscreen" class="bg-gray-800/90 p-3 rounded-full shadow-lg border border-gray-600 active:scale-95 transition-transform">
+        <button onclick="document.getElementById('input-json').click()" class="bg-gray-800/90 p-3 rounded-full shadow-lg border border-gray-600 active:scale-95 transition-transform" title="Load Route">
+            <i class="fas fa-folder-open text-purple-400"></i>
+        </button>
+        <button onclick="app.ui.saveToFile()" class="bg-gray-800/90 p-3 rounded-full shadow-lg border border-gray-600 active:scale-95 transition-transform" title="Save Route">
+            <i class="fas fa-save text-green-400"></i>
+        </button>
+        <button id="btn-fullscreen" class="bg-gray-800/90 p-3 rounded-full shadow-lg border border-gray-600 active:scale-95 transition-transform" title="Fullscreen">
             <i class="fas fa-expand text-white"></i>
         </button>
     </div>
+    
+    <!-- Hidden File Inputs -->
+    <input type="file" id="input-json" accept=".json" class="hidden">
+    <input type="file" id="input-gpx" accept=".gpx" class="hidden">
 
     <!-- Toast Container -->
     <div id="toast-container" class="absolute top-20 left-0 right-0 z-[3000] flex flex-col items-center gap-2 p-4"></div>
@@ -241,7 +251,6 @@
                     </button>
                     <button class="text-gray-400"><i class="fas fa-chevron-down"></i></button>
                 </div>
-                <input type="file" id="input-gpx" accept=".gpx" class="hidden">
             </div>
 
             <div class="p-4 overflow-y-auto no-scrollbar space-y-4">
@@ -434,6 +443,29 @@
             update(key, value) { this.state[key] = value; this.notify(key, value); }
             get(key) { return this.state[key]; }
             notify(key, value) { this.listeners.forEach(l => l(key, value)); }
+            
+            getRouteData() {
+                return {
+                    startPoint: this.state.startPoint,
+                    endPoint: this.state.endPoint,
+                    waypoints: this.state.waypoints,
+                    sections: this.state.sections,
+                    routeGeometry: this.state.routeGeometry,
+                    elevationData: this.state.elevationData,
+                    distanceTraveled: this.state.distanceTraveled,
+                    timestamp: Date.now()
+                };
+            }
+            
+            loadRouteData(data) {
+                this.update('startPoint', data.startPoint);
+                this.update('endPoint', data.endPoint);
+                this.update('waypoints', data.waypoints || []);
+                this.update('sections', data.sections);
+                this.update('routeGeometry', data.routeGeometry);
+                this.update('elevationData', data.elevationData);
+                this.update('distanceTraveled', data.distanceTraveled);
+            }
         }
 
         class MapService {
@@ -675,11 +707,11 @@
                 this.app = app; this.store = app.store;
                 this.panels = { planner: document.getElementById('panel-planner'), advanced: document.getElementById('panel-advanced'), dashboard: document.getElementById('panel-dashboard') };
                 this.activePanel = null;
-                this.plannerChart = null; this.dashboardChart = null; // Charts initialized later
+                this.plannerChart = null; this.dashboardChart = null;
                 this.plannerViewState = { zoom: 1.0, pan: 0.0 }; this.dashboardViewState = { zoom: 1.0, pan: 0.0 };
                 this.modalCallback = null;
                 this.store.subscribe((key, val) => this.renderUpdate(key, val));
-                this.initCharts(); // Corrected method name
+                this.initCharts();
             }
 
             showLoading(msg) {
@@ -1169,6 +1201,25 @@
                 // 7. Update Metrics
                 this.updateMetrics();
             }
+            
+            saveToFile() {
+                if (!this.store.get('routeGeometry')) {
+                    this.showToast('No route to save');
+                    return;
+                }
+                const filename = prompt('Enter filename:', 'route.json');
+                if (!filename) return;
+                
+                const data = this.store.getRouteData();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename.endsWith('.json') ? filename : filename + '.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                this.showToast('Route saved to file');
+            }
         }
 
         // --- 6. MAIN APP ORCHESTRATOR ---
@@ -1189,7 +1240,37 @@
                 this.setupAutocomplete('input-end', 'suggestions-end', 'endPoint');
                 document.getElementById('btn-add-waypoint').onclick = () => this.ui.addWaypoint();
 
-                // File Upload Listener
+                // JSON Load Listener
+                document.getElementById('input-json').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        try {
+                            this.ui.showLoading('Loading route...');
+                            const data = JSON.parse(ev.target.result);
+                            this.store.loadRouteData(data);
+                            this.map.clearWaypoints();
+                            if (data.startPoint) this.map.addMarker('start', data.startPoint);
+                            if (data.endPoint) this.map.addMarker('end', data.endPoint);
+                            data.waypoints.forEach((wp, i) => this.map.addMarker('waypoint', wp, i));
+                            if (data.routeGeometry) this.map.drawRoute(data.routeGeometry);
+                            this.ui.renderSections();
+                            this.ui.renderWaypoints();
+                            document.getElementById('btn-next-step').classList.remove('hidden');
+                            this.ui.showToast('Route loaded successfully');
+                            this.ui.hideLoading();
+                        } catch (err) {
+                            this.ui.showToast('Invalid JSON file');
+                            this.ui.hideLoading();
+                        }
+                    };
+                    reader.readAsText(file);
+                    e.target.value = '';
+                });
+
+                // GPX File Upload Listener
                 document.getElementById('input-gpx').addEventListener('change', (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
@@ -1258,15 +1339,15 @@
                             // UI Updates
                             document.getElementById('btn-next-step').classList.remove('hidden');
                             this.ui.renderSections();
+                            this.ui.hideLoading();
                         } catch (err) {
                             console.error(err);
                             this.ui.showToast("Error processing GPX file.");
-                        } finally {
                             this.ui.hideLoading();
                         }
                     };
                     reader.readAsText(file);
-                    e.target.value = ''; // Reset input
+                    e.target.value = '';
                 });
 
                 let settingStart = true;

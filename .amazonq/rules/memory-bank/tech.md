@@ -31,9 +31,14 @@
   - ES6 Classes for service architecture
   - Async/Await for API calls
   - Arrow functions for callbacks
-  - Template literals for dynamic HTML
+  - Template literals for dynamic HTML generation
   - Destructuring for cleaner code
-  - Array methods (map, filter, forEach)
+  - Array methods (map, filter, forEach, splice)
+  - Spread operator for array cloning
+  - DOM manipulation (createElement, innerHTML, classList)
+  - Event listeners (addEventListener, onclick)
+  - FileReader API for GPX parsing
+  - DOMParser for XML parsing
 
 ### C# (Minimal)
 - **Version**: C# 11 (.NET 8.0)
@@ -59,11 +64,14 @@
 - **Purpose**: Elevation profile visualization
 - **Features Used**:
   - Line chart with area fill
-  - Custom interaction modes
-  - Dynamic data updates
-  - Hover events for map synchronization
-  - Axis scaling and panning
-  - Responsive canvas rendering
+  - Custom interaction modes (index, non-intersect)
+  - Dynamic data updates with performance mode ('none')
+  - Hover events for map synchronization (onHover callback)
+  - Axis scaling and panning (min/max control)
+  - Responsive canvas rendering (maintainAspectRatio: false)
+  - Segment-based styling (segment.borderColor and backgroundColor)
+  - Custom canvas event listeners for touch/mouse gestures
+  - Independent chart instances with separate view states
 
 ### Font Awesome
 - **Version**: 6.4.0
@@ -99,7 +107,9 @@
 - **Endpoint**: https://api.open-elevation.com/api/v1/lookup
 - **Purpose**: Elevation data for route coordinates
 - **Method**: POST with JSON body
-- **Fallback**: Mock data generation on API failure
+- **Sampling**: Limited to 500 points for performance
+- **Fallback**: Mock data generation on API failure (sine wave pattern)
+- **Headers**: Content-Type and Accept application/json
 
 ## Build System
 
@@ -127,12 +137,15 @@
 ### Browser Requirements
 - **Modern Browsers**: Chrome, Firefox, Safari, Edge
 - **Required Features**:
-  - ES6+ JavaScript support
-  - Geolocation API
-  - Canvas API
-  - Fullscreen API
-  - Fetch API
+  - ES6+ JavaScript support (Classes, Async/Await, Arrow Functions)
+  - Geolocation API (watchPosition with high accuracy)
+  - Canvas API (for Chart.js rendering)
+  - Fullscreen API (requestFullscreen/exitFullscreen)
+  - Fetch API (for external API calls)
   - CSS Grid and Flexbox
+  - FileReader API (for GPX file reading)
+  - DOMParser (for XML parsing)
+  - Touch Events (for mobile gesture support)
 
 ## Development Commands
 
