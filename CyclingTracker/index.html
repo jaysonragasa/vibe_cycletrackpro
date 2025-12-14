@@ -285,7 +285,7 @@
         </div>
 
         <!-- 2. ADVANCED ROUTE PLANNER PANEL -->
-        <div id="panel-advanced" class="panel pointer-events-auto bg-gray-900/95 border-t border-gray-700 rounded-t-2xl shadow-2xl w-full max-h-[60vh] flex flex-col transform translate-y-full absolute bottom-0 z-[1010]">
+        <div id="panel-advanced" class="panel pointer-events-auto bg-gray-900/95 border-t border-gray-700 rounded-t-2xl shadow-2xl w-full max-h-[60vh] flex flex-col transform translate-y-full absolute bottom-0">
             <div class="p-3 border-b border-gray-700 flex justify-between items-center bg-gray-800/50 rounded-t-2xl">
                 <h2 class="font-bold text-base text-blue-400">Advance Route Planning</h2>
                 <button onclick="app.ui.togglePanel('planner')" class="text-xs text-gray-300 underline">Back</button>
@@ -326,7 +326,7 @@
         </div>
 
         <!-- 3. DASHBOARD PANEL -->
-        <div id="panel-dashboard" class="panel pointer-events-auto bg-gray-900/95 border-t border-gray-700 rounded-t-2xl shadow-2xl w-full flex flex-col transform translate-y-full absolute bottom-0 z-[1005]">
+        <div id="panel-dashboard" class="panel pointer-events-auto bg-gray-900/95 border-t border-gray-700 rounded-t-2xl shadow-2xl w-full flex flex-col transform translate-y-full absolute bottom-0">
             <div class="w-full h-5 flex justify-center items-center cursor-pointer" onclick="app.ui.togglePanel('dashboard')">
                 <div class="w-12 h-1 bg-gray-600 rounded-full"></div>
             </div>
@@ -825,13 +825,16 @@
             hideModal() { document.getElementById('custom-modal').classList.add('hidden'); this.modalCallback = null; }
 
             togglePanel(name) {
+                // Hide all panels first
                 Object.values(this.panels).forEach(p => p.classList.add('translate-y-full'));
                 document.getElementById('collapsed-controls').classList.remove('opacity-0');
-                if (this.activePanel === name) { this.activePanel = null; }
-                else {
+                
+                if (this.activePanel === name) { 
+                    this.activePanel = null; 
+                } else {
                     this.activePanel = name;
                     this.panels[name].classList.remove('translate-y-full');
-                    if (['dashboard', 'planner', 'advanced'].includes(name)) document.getElementById('collapsed-controls').classList.add('opacity-0');
+                    document.getElementById('collapsed-controls').classList.add('opacity-0');
                 }
             }
 
