@@ -1,16 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CycleTrack Pro</title>
-
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+    
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -19,194 +19,69 @@
 
     <style>
         /* Custom Utilities */
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #1a202c;
-        }
-
-        #map {
-            height: 100%;
-            width: 100%;
-            z-index: 0;
-        }
-
+        body, html { height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #1a202c; }
+        #map { height: 100%; width: 100%; z-index: 0; }
+        
         /* Floating Panel Transitions */
         .panel {
             /* Keep transform transition smooth, add visibility transition for clean hiding */
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s linear;
         }
-
+        
         /* Hide scrollbar for Chrome, Safari and Opera */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* Custom Visible Scrollbar for Segments */
         .custom-scrollbar {
             scrollbar-width: thin;
             scrollbar-color: #4b5563 #1f2937;
         }
-
-            .custom-scrollbar::-webkit-scrollbar {
-                width: 6px;
-            }
-
-            .custom-scrollbar::-webkit-scrollbar-track {
-                background: #1f2937;
-                border-radius: 4px;
-            }
-
-            .custom-scrollbar::-webkit-scrollbar-thumb {
-                background-color: #4b5563;
-                border-radius: 10px;
-            }
-
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background-color: #6b7280;
-                }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #6b7280;
+        }
 
         /* Map Controls override */
-        .leaflet-control-container .leaflet-top {
-            top: 60px;
-        }
-
+        .leaflet-control-container .leaflet-top { top: 60px; } 
+        
         /* Slider Styling */
-        .range-slider-wrapper {
-            position: relative;
-            height: 24px;
-            width: 100%;
-        }
-
-        .range-slider-track {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #374151;
-            border-radius: 999px;
-            z-index: 0;
-        }
-
-        .range-slider-highlight {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 4px;
-            background: #3b82f6;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .range-input {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            left: 0;
-            right: 0;
-            width: 100%;
-            -webkit-appearance: none;
-            background: transparent;
-            pointer-events: none;
-            z-index: 2;
-            margin: 0;
-        }
-
-            .range-input::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                pointer-events: auto;
-                height: 16px;
-                width: 16px;
-                border-radius: 50%;
-                background: #ffffff;
-                border: 2px solid #3b82f6;
-                cursor: pointer;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-                position: relative;
-                z-index: 3;
-            }
-
-            .range-input.locked::-webkit-slider-thumb {
-                background: #4b5563;
-                border-color: #374151;
-                cursor: not-allowed;
-            }
-
-        input.speed-slider {
-            -webkit-appearance: none;
-            background: transparent;
-        }
-
-            input.speed-slider::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                height: 14px;
-                width: 14px;
-                border-radius: 50%;
-                background: #10b981;
-                margin-top: -5px;
-            }
-
-            input.speed-slider::-webkit-slider-runnable-track {
-                width: 100%;
-                height: 4px;
-                background: #4b5563;
-                border-radius: 2px;
-            }
+        .range-slider-wrapper { position: relative; height: 24px; width: 100%; } 
+        .range-slider-track { position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; height: 4px; background: #374151; border-radius: 999px; z-index: 0; }
+        .range-slider-highlight { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; background: #3b82f6; z-index: 1; pointer-events: none; }
+        .range-input { position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; width: 100%; -webkit-appearance: none; background: transparent; pointer-events: none; z-index: 2; margin: 0; }
+        .range-input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; height: 16px; width: 16px; border-radius: 50%; background: #ffffff; border: 2px solid #3b82f6; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3); position: relative; z-index: 3; }
+        .range-input.locked::-webkit-slider-thumb { background: #4b5563; border-color: #374151; cursor: not-allowed; }
+        
+        input.speed-slider { -webkit-appearance: none; background: transparent; }
+        input.speed-slider::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: #10b981; margin-top: -5px; }
+        input.speed-slider::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #4b5563; border-radius: 2px; }
 
         /* Waypoint Inputs Animation */
-        .waypoint-item {
-            animation: slideIn 0.2s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        .waypoint-item { animation: slideIn 0.2s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Toast Notification */
-        #toast-container {
-            pointer-events: none;
-        }
-
-        .toast {
-            pointer-events: auto;
-            animation: fadeUp 0.3s ease-out;
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        #toast-container { pointer-events: none; }
+        .toast { pointer-events: auto; animation: fadeUp 0.3s ease-out; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
         /* Heading Icon Base Style */
         .user-heading-container i {
             transition: transform 0.1s linear; /* Smooth rotation */
             display: block;
         }
-
+        
         /* Map Panes (Required for Map Rotation) */
         #map .leaflet-map-pane {
             transition: transform 0.5s ease-out; /* Smooth map rotation */
@@ -257,7 +132,7 @@
                 <input type="file" id="input-gpx" accept=".gpx" class="hidden">
                 <input type="file" id="input-json" accept=".json" class="hidden">
             </div>
-
+            
             <div class="p-4 overflow-y-auto no-scrollbar space-y-4">
 
                 <div class="relative">
@@ -274,7 +149,7 @@
                 <div class="relative">
                     <i class="fas fa-map-marker-alt absolute left-3 top-3 text-red-500"></i>
                     <input type="text" id="input-end" placeholder="Tap map or enter Destination" class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 pl-10 pr-3 focus:border-blue-500 focus:outline-none text-sm">
-                    <ul id="suggestions-end" class="hidden absolute z-50 w-full bg-gray-800 border border-gray-600 mt-1 rounded-md shadow-lg max-h-40 overflow-auto"></ul>
+                     <ul id="suggestions-end" class="hidden absolute z-50 w-full bg-gray-800 border border-gray-600 mt-1 rounded-md shadow-lg max-h-40 overflow-auto"></ul>
                 </div>
                 <div class="flex gap-2">
                     <button id="btn-calc-route" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
@@ -301,7 +176,7 @@
                     <button onclick="app.ui.togglePanel('planner')" class="text-xs text-gray-300 underline">Back</button>
                 </div>
             </div>
-
+            
             <!-- PLANNER ELEVATION GRAPH -->
             <div class="px-2 pt-2">
                 <div class="flex justify-between items-center mb-1">
@@ -322,9 +197,9 @@
             <div class="bg-gray-800/80 p-2 border-b border-gray-700 flex justify-between items-center text-[10px] mt-2">
                 <div class="text-center"><div class="text-gray-400">Distance</div><div class="font-bold text-white text-xs" id="adv-total-dist">0.0 km</div></div>
                 <div class="text-center"><div class="text-gray-400">ETT</div><div class="font-bold text-white text-xs" id="adv-total-time">0h 00m</div></div>
-                <div class="text-center"><div class="font-bold text-green-400 text-xs" id="adv-eta">--:--</div></div>
+                <div class="text-center"><div class="text-gray-400">ETA</div><div class="font-bold text-green-400 text-xs" id="adv-eta">--:--</div></div>
             </div>
-
+            
             <div class="p-2 overflow-y-auto custom-scrollbar flex-1 h-32">
                 <!-- LLM Analysis Output -->
                 <div id="ai-analysis" class="bg-gray-700/50 p-2 mb-2 rounded-lg text-xs border border-gray-600">
@@ -342,7 +217,7 @@
 
             </div>
             <div class="p-2 border-t border-gray-700 bg-gray-900">
-                <button onclick="app.ui.finalizePlan()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold shadow-lg text-sm">Go to Dashboard</button>
+                 <button onclick="app.ui.finalizePlan()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold shadow-lg text-sm">Go to Dashboard</button>
             </div>
         </div>
 
@@ -437,7 +312,7 @@
                 <h3 id="loading-message" class="text-lg font-bold text-white tracking-wider font-mono">Processing...</h3>
             </div>
         </div>
-
+        
         <!-- FILENAME INPUT MODAL -->
         <div id="filename-modal" class="hidden fixed inset-0 z-[2500] flex items-center justify-center p-4 pointer-events-auto">
             <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
@@ -463,11 +338,12 @@
         const SEGMENT_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
         class StateStore {
+// ... [StateStore Class] ...
             constructor() {
                 this.state = {
-                    startPoint: null,
+                    startPoint: null, 
                     endPoint: null,
-                    waypoints: [],
+                    waypoints: [], 
                     routeGeometry: null,
                     elevationData: null,
                     sections: [{ id: 1, speed: 25, endRatio: 1.0 }],
@@ -488,7 +364,7 @@
                 this.store = store;
                 this.app = app;
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this.map);
-
+                
                 this.markers = { start: null, end: null, waypoints: [], user: null, hover: null };
                 this.routeLayer = null;
                 this.segmentGroup = L.featureGroup().addTo(this.map);
@@ -498,7 +374,7 @@
                 this.headingIcon = L.divIcon({
                     className: 'user-heading-container',
                     html: '<i class="fas fa-location-arrow text-blue-500 text-2xl drop-shadow-md"></i>',
-                    iconSize: [24, 24],
+                    iconSize: [24, 24], 
                     iconAnchor: [12, 12]
                 });
 
@@ -515,12 +391,12 @@
                 const isStart = type === 'start';
                 const isEnd = type === 'end';
                 const color = isStart ? 'green' : (isEnd ? 'red' : 'blue');
-
+                
                 // Use a generic DivIcon structure for route points (Start, End, Waypoints)
                 const routePointIcon = L.divIcon({
                     html: `<i class="fas fa-map-marker-alt text-${color}-500 text-3xl drop-shadow-md cursor-pointer hover:scale-110 transition-transform"></i>`,
-                    className: '',
-                    iconSize: [30, 30],
+                    className: '', 
+                    iconSize: [30, 30], 
                     iconAnchor: [15, 30]
                 });
 
@@ -533,7 +409,7 @@
                 marker.on('dragend', async (e) => {
                     const newPos = e.target.getLatLng();
                     const pointData = await this.app.route.resolvePoint(newPos);
-
+                    
                     if (isStart) this.store.update('startPoint', pointData);
                     else if (isEnd) this.store.update('endPoint', pointData);
                     else if (index !== null) {
@@ -541,7 +417,7 @@
                         wps[index] = pointData;
                         this.store.update('waypoints', wps);
                     }
-
+                    
                     this.store.update('sections', [{ id: 1, speed: 25, endRatio: 1.0 }]);
                     await this.app.ui.triggerRouteCalc();
                     this.app.ui.togglePanel('planner');
@@ -566,9 +442,9 @@
 
             drawRoute(coordinates) {
                 if (this.routeLayer) this.map.removeLayer(this.routeLayer);
-                this.segmentGroup.clearLayers();
-                this.clearHighlight();
-
+                this.segmentGroup.clearLayers(); 
+                this.clearHighlight(); 
+                
                 this.routeLayer = L.polyline(coordinates, { color: '#334155', weight: 4, opacity: 0.3 }).addTo(this.map);
                 this.map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
 
@@ -577,7 +453,7 @@
                     const pointData = await this.app.route.resolvePoint(e.latlng);
                     wps.push(pointData);
                     this.store.update('waypoints', wps);
-
+                    
                     this.app.ui.showToast("Stop added. Recalculating...");
                     this.store.update('sections', [{ id: 1, speed: 25, endRatio: 1.0 }]);
                     await this.app.ui.triggerRouteCalc();
@@ -622,14 +498,14 @@
 
             updateUserLocation(lat, lng, heading) {
                 const latlng = [lat, lng];
-
+                
                 const rideActive = this.store.get('rideStatus') === 'active';
                 const currentHeading = typeof heading === 'number' && !isNaN(heading) ? heading : 0;
 
                 // 1. Apply Map Rotation (Heads-Up View when active)
                 const mapPane = this.map.getPane('mapPane');
                 if (rideActive) {
-                    // Rotate Map opposite to heading to keep direction of travel "up"
+                     // Rotate Map opposite to heading to keep direction of travel "up"
                     mapPane.style.transform = `rotate(${-currentHeading}deg)`;
                     this.map.panTo(latlng, { animate: true, duration: 1 });
                 } else {
@@ -643,7 +519,7 @@
                 } else {
                     this.markers.user.setLatLng(latlng);
                 }
-
+                
                 // 3. Apply Marker Counter-Rotation
                 if (this.markers.user._icon) {
                     const innerIcon = this.markers.user._icon.querySelector('i');
@@ -660,7 +536,7 @@
             }
 
             showHoverMarker(lat, lng) {
-                if (!lat || !lng) return;
+                if(!lat || !lng) return;
                 // FIX: Reference the icon stored in this instance
                 if (!this.markers.hover) this.markers.hover = L.marker([lat, lng], { icon: this.hoverIcon }).addTo(this.map);
                 else this.markers.hover.setLatLng([lat, lng]);
@@ -669,14 +545,14 @@
 
         class RouteService {
             constructor(store) { this.store = store; }
-
+            
             async resolvePoint(latlng) {
                 let address = "Location";
                 try {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`);
                     const data = await res.json();
-                    if (data && data.display_name) address = data.display_name;
-                } catch (err) { console.error(err); }
+                    if(data && data.display_name) address = data.display_name;
+                } catch(err) { console.error(err); }
                 return { lat: latlng.lat, lng: latlng.lng, address: address };
             }
 
@@ -696,13 +572,13 @@
                 const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
                 const res = await fetch(url);
                 const json = await res.json();
-
+                
                 if (json.code !== 'Ok') throw new Error("Routing failed");
-
+                
                 const geoPoints = json.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
                 this.store.update('routeGeometry', geoPoints);
-                this.store.update('distanceTraveled', json.routes[0].distance);
-
+                this.store.update('distanceTraveled', json.routes[0].distance); 
+                
                 this.getElevation(geoPoints);
                 return geoPoints;
             }
@@ -712,9 +588,9 @@
                 const targetPoints = 500;
                 const step = Math.max(1, Math.floor(coords.length / targetPoints));
                 const samples = coords.filter((_, i) => i % step === 0).map(c => ({ latitude: c[0], longitude: c[1] }));
-
+                
                 // If coordinates are too sparse, we might miss detail, but this balances API limits vs accuracy.
-
+                
                 // Elevation API fetching starts here
                 try {
                     const res = await fetch('https://api.open-elevation.com/api/v1/lookup', {
@@ -734,45 +610,21 @@
         class RideManager {
             constructor(app) {
                 this.app = app; this.store = app.store;
-                this.watchId = null; this.timerId = null; this.wakeLock = null; // Added wakeLock property
-                this.lastTime = null;
+                this.watchId = null; this.timerId = null; this.lastTime = null;
             }
-
-            async requestWakeLock() {
-                if ('wakeLock' in navigator) {
-                    try {
-                        this.wakeLock = await navigator.wakeLock.request('screen');
-                        this.app.ui.showToast("Screen will stay on during ride", 2000);
-                        this.wakeLock.addEventListener('release', () => {
-                            console.log('Wake Lock released');
-                            this.wakeLock = null;
-                        });
-                    } catch (err) {
-                        console.error('Failed to acquire wake lock:', err);
-                        this.app.ui.showToast(`Screen lock failed: ${err.name}`, 3000);
-                    }
-                } else {
-                    this.app.ui.showToast("Screen wake lock not supported on this device", 3000);
-                }
-            }
-
-            releaseWakeLock() {
-                if (this.wakeLock) {
-                    this.wakeLock.release();
-                    this.wakeLock = null;
-                }
-            }
-
             toggleRide() {
                 const status = this.store.get('rideStatus');
                 if (status === 'idle' || status === 'paused') this.start(); else this.pause();
             }
-
+            stopRide() {
+                this.store.update('rideStatus', 'idle');
+                if (this.watchId) navigator.geolocation.clearWatch(this.watchId);
+                if (this.timerId) clearInterval(this.timerId);
+                this.watchId = null; this.timerId = null;
+            }
             start() {
                 this.store.update('rideStatus', 'active');
                 this.lastTime = Date.now();
-                this.requestWakeLock(); // Request screen wake lock
-
                 // Start geolocation watch which triggers MapService.updateUserLocation (including panning/centering)
                 if ('geolocation' in navigator) {
                     this.watchId = navigator.geolocation.watchPosition(pos => this.processPosition(pos), err => console.error(err), { enableHighAccuracy: true });
@@ -784,29 +636,15 @@
                     if (this.store.get('currentSpeed') > 2) this.store.update('movingTime', this.store.get('movingTime') + delta);
                 }, 1000);
             }
-
-            pause() {
-                this.store.update('rideStatus', 'paused');
-                clearInterval(this.timerId);
-                this.releaseWakeLock(); // Release screen wake lock on pause
-            }
-
-            stopRide() {
-                this.store.update('rideStatus', 'idle');
-                if (this.watchId) navigator.geolocation.clearWatch(this.watchId);
-                if (this.timerId) clearInterval(this.timerId);
-                this.watchId = null; this.timerId = null;
-                this.releaseWakeLock(); // Release screen wake lock on stop
-            }
-
+            pause() { this.store.update('rideStatus', 'paused'); clearInterval(this.timerId); }
             processPosition(pos) {
                 const { latitude, longitude, speed, heading } = pos.coords;
                 const speedKmh = (speed || 0) * 3.6;
                 this.store.update('currentSpeed', speedKmh);
                 const oldAvg = this.store.get('avgSpeed');
                 this.store.update('avgSpeed', (oldAvg + speedKmh) / 2);
-
-                // Pass heading to map service for map/marker rotation
+                
+                // Pass heading to map service for marker rotation
                 this.app.map.updateUserLocation(latitude, longitude, heading);
             }
         }
@@ -815,7 +653,7 @@
             constructor(app) {
                 this.app = app; this.store = app.store;
                 this.panels = { planner: document.getElementById('panel-planner'), advanced: document.getElementById('panel-advanced'), dashboard: document.getElementById('panel-dashboard') };
-                this.activePanel = null;
+                this.activePanel = null; 
                 this.plannerChart = null; this.dashboardChart = null; // Charts initialized later
                 this.plannerViewState = { zoom: 1.0, pan: 0.0 }; this.dashboardViewState = { zoom: 1.0, pan: 0.0 };
                 this.modalCallback = null;
@@ -877,7 +715,7 @@
                 const modal = document.getElementById('filename-modal');
                 const input = document.getElementById('filename-input');
                 const saveBtn = document.getElementById('filename-btn-save');
-
+                
                 input.value = `cycle_plan_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
                 modal.classList.remove('hidden');
 
@@ -906,12 +744,12 @@
                     this.activePanel = null; // Collapse action is handled above
                 } else {
                     this.activePanel = name;
-
+                    
                     // 2. Make the target panel visible BEFORE removing translate-y-full
                     panelToShow.style.visibility = 'visible';
                     panelToShow.style.pointerEvents = 'auto';
                     panelToShow.classList.remove('translate-y-full');
-
+                    
                     if (['dashboard', 'planner', 'advanced'].includes(name)) document.getElementById('collapsed-controls').classList.add('opacity-0');
                 }
             }
@@ -961,11 +799,11 @@
                     const div = document.createElement('div');
                     div.className = "relative waypoint-item";
                     div.innerHTML = `
-                            <i class="fas fa-map-marker absolute left-3 top-3 text-blue-400 text-xs"></i>
-                            <input type="text" id="input-wp-${idx}" value="${wp.address || ''}" placeholder="Stop ${idx + 1}" class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 pl-10 pr-8 focus:border-blue-500 focus:outline-none text-sm">
-                            <button onclick="app.ui.removeWaypoint(${idx})" class="absolute right-2 top-2 text-gray-500 hover:text-red-500 p-1"><i class="fas fa-times"></i></button>
-                            <ul id="suggestions-wp-${idx}" class="hidden absolute z-50 w-full bg-gray-800 border border-gray-600 mt-1 rounded-md shadow-lg max-h-40 overflow-auto"></ul>
-                        `;
+                        <i class="fas fa-map-marker absolute left-3 top-3 text-blue-400 text-xs"></i>
+                        <input type="text" id="input-wp-${idx}" value="${wp.address || ''}" placeholder="Stop ${idx + 1}" class="w-full bg-gray-800 border border-gray-600 rounded-lg py-2 pl-10 pr-8 focus:border-blue-500 focus:outline-none text-sm">
+                        <button onclick="app.ui.removeWaypoint(${idx})" class="absolute right-2 top-2 text-gray-500 hover:text-red-500 p-1"><i class="fas fa-times"></i></button>
+                        <ul id="suggestions-wp-${idx}" class="hidden absolute z-50 w-full bg-gray-800 border border-gray-600 mt-1 rounded-md shadow-lg max-h-40 overflow-auto"></ul>
+                    `;
                     container.appendChild(div);
                     this.app.setupAutocomplete(`input-wp-${idx}`, `suggestions-wp-${idx}`, `waypoint-${idx}`);
                 });
@@ -981,43 +819,43 @@
             removeWaypoint(idx) {
                 const wps = this.store.get('waypoints');
                 const mapMarkers = this.app.map.markers.waypoints;
-                if (mapMarkers[idx]) {
+                if(mapMarkers[idx]) {
                     this.app.map.map.removeLayer(mapMarkers[idx]);
                     mapMarkers.splice(idx, 1);
                 }
-
+                
                 wps.splice(idx, 1);
                 this.store.update('waypoints', wps);
-                this.app.map.clearWaypoints();
-                wps.forEach((wp, i) => { if (wp.lat && wp.lng) this.app.map.addMarker('waypoint', wp, i); });
-
-                if (this.store.get('startPoint') && this.store.get('endPoint')) this.triggerRouteCalc();
+                this.app.map.clearWaypoints(); 
+                wps.forEach((wp, i) => { if(wp.lat && wp.lng) this.app.map.addMarker('waypoint', wp, i); });
+                
+                if(this.store.get('startPoint') && this.store.get('endPoint')) this.triggerRouteCalc();
             }
 
             async triggerRouteCalc() {
                 const s = this.store.get('startPoint');
                 const e = this.store.get('endPoint');
                 const wps = this.store.get('waypoints').filter(w => w.lat && w.lng);
-
+                
                 const btn = document.getElementById('btn-calc-route');
                 const btnNext = document.getElementById('btn-next-step');
 
-                if (s && e) {
+                if(s && e) {
                     btn.innerText = "Calculating...";
                     btn.disabled = true;
-                    btnNext.classList.add('hidden');
+                    btnNext.classList.add('hidden'); 
 
                     try {
                         const coords = await this.app.route.getRoute(s, e, wps);
                         this.app.map.drawRoute(coords);
-
+                        
                         btn.innerText = "Check Route";
                         btn.disabled = false;
                         btnNext.classList.remove('hidden');
-
+                        
                         this.store.update('sections', [{ id: 1, speed: 25, endRatio: 1.0 }]);
-                        this.renderSections();
-                    } catch (err) {
+                        this.renderSections(); 
+                    } catch(err) {
                         console.error(err);
                         this.showToast("Error: " + err.message);
                         btn.innerText = "Check Route";
@@ -1029,7 +867,7 @@
             initCharts() {
                 this.plannerChart = this.createChart('elevationChartPlanner', 'plannerViewState');
                 this.dashboardChart = this.createChart('elevationChartDashboard', 'dashboardViewState', 'chk-show-segment');
-
+                
                 this.setupChartControls('btn-plan-', 'plannerViewState', this.plannerChart);
                 this.setupChartControls('btn-dash-', 'dashboardViewState', this.dashboardChart);
             }
@@ -1038,14 +876,14 @@
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) return null;
                 const ctx = canvas.getContext('2d');
-
+                
                 const getSegmentColor = (ctx, isBackground) => {
                     const sections = this.store.get('sections');
                     if (!sections || !ctx.chart.data.labels) return SEGMENT_COLORS[0];
                     const totalPoints = ctx.chart.data.labels.length;
                     const idx = ctx.p0DataIndex; const ratio = idx / totalPoints;
                     let secIdx = 0;
-                    for (let i = 0; i < sections.length; i++) { if (ratio <= sections[i].endRatio) { secIdx = i; break; } }
+                    for(let i=0; i<sections.length; i++) { if(ratio <= sections[i].endRatio) { secIdx = i; break; } }
                     const hexColor = SEGMENT_COLORS[secIdx % SEGMENT_COLORS.length];
                     return isBackground ? hexColor + '40' : hexColor;
                 };
@@ -1053,32 +891,32 @@
                 const chart = new Chart(ctx, {
                     type: 'line',
                     data: { labels: [], datasets: [{ label: 'Elevation (m)', data: [], borderWidth: 2, pointRadius: 0, pointHoverRadius: 6, tension: 0.1, fill: true, segment: { borderColor: ctx => getSegmentColor(ctx, false), backgroundColor: ctx => getSegmentColor(ctx, true) } }] },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: { legend: { display: false } },
-                        scales: { x: { display: false, min: 0, max: 100 }, y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } } },
-                        onHover: (e, el) => {
-                            if (el.length > 0) {
-                                const d = this.store.get('elevationData');
-                                if (d && d[el[0].index]) this.app.map.showHoverMarker(d[el[0].index].latitude, d[el[0].index].longitude);
-                            }
-                        }
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, 
+                        interaction: { mode: 'index', intersect: false }, 
+                        plugins: { legend: { display: false } }, 
+                        scales: { x: { display: false, min: 0, max: 100 }, y: { grid: { color: '#374151' }, ticks: { color: '#9ca3af' } } }, 
+                        onHover: (e, el) => { 
+                            if (el.length > 0) { 
+                                const d = this.store.get('elevationData'); 
+                                if (d && d[el[0].index]) this.app.map.showHoverMarker(d[el[0].index].latitude, d[el[0].index].longitude); 
+                            } 
+                        } 
                     }
                 });
 
                 // Gesture Logic for this specific canvas
                 let isDragging = false, lastX = 0;
                 const startDrag = (x) => { isDragging = true; lastX = x; canvas.style.cursor = 'grabbing'; };
-                const moveDrag = (x) => {
-                    if (!isDragging) return;
-                    const w = canvas.width || canvas.clientWidth;
-                    if (w) this.panChart(chart, this[viewStateKey], ((lastX - x) / w) * 2, checkboxId);
-                    lastX = x;
+                const moveDrag = (x) => { 
+                    if (!isDragging) return; 
+                    const w = canvas.width || canvas.clientWidth; 
+                    if(w) this.panChart(chart, this[viewStateKey], ((lastX - x) / w) * 2, checkboxId); 
+                    lastX = x; 
                 };
                 const endDrag = () => { isDragging = false; canvas.style.cursor = 'default'; };
                 canvas.addEventListener('mousedown', e => startDrag(e.clientX)); canvas.addEventListener('mousemove', e => moveDrag(e.clientX)); canvas.addEventListener('mouseup', endDrag); canvas.addEventListener('mouseleave', endDrag);
-                canvas.addEventListener('touchstart', e => startDrag(e.touches[0].clientX), { passive: true }); canvas.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX), { passive: true }); canvas.addEventListener('touchend', endDrag);
+                canvas.addEventListener('touchstart', e => startDrag(e.touches[0].clientX), {passive: true}); canvas.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX), {passive: true}); canvas.addEventListener('touchend', endDrag);
 
                 return chart;
             }
@@ -1090,24 +928,24 @@
                 document.getElementById(prefix + 'reset').onclick = () => { this[viewStateKey].zoom = 1.0; this[viewStateKey].pan = 0.0; this.updateChartAxis(chart, this[viewStateKey], checkboxId); };
                 document.getElementById(prefix + 'pan-left').onclick = () => this.panChart(chart, this[viewStateKey], -0.1, checkboxId);
                 document.getElementById(prefix + 'pan-right').onclick = () => this.panChart(chart, this[viewStateKey], 0.1, checkboxId);
-
-                if (checkboxId && document.getElementById(checkboxId)) {
+                
+                if(checkboxId && document.getElementById(checkboxId)) {
                     document.getElementById(checkboxId).onchange = () => this.updateChartAxis(chart, this[viewStateKey], checkboxId);
                 }
             }
 
-            zoomChart(chart, viewState, factor, checkboxId) {
-                viewState.zoom = Math.max(0.05, Math.min(1.0, viewState.zoom * factor));
-                this.updateChartAxis(chart, viewState, checkboxId);
+            zoomChart(chart, viewState, factor, checkboxId) { 
+                viewState.zoom = Math.max(0.05, Math.min(1.0, viewState.zoom * factor)); 
+                this.updateChartAxis(chart, viewState, checkboxId); 
             }
-
-            panChart(chart, viewState, delta, checkboxId) {
-                viewState.pan = Math.max(0, Math.min(1, viewState.pan + (delta * viewState.zoom)));
-                this.updateChartAxis(chart, viewState, checkboxId);
+            
+            panChart(chart, viewState, delta, checkboxId) { 
+                viewState.pan = Math.max(0, Math.min(1, viewState.pan + (delta * viewState.zoom))); 
+                this.updateChartAxis(chart, viewState, checkboxId); 
             }
 
             updateChartAxis(chart, viewState, checkboxId) {
-                if (!chart) return;
+                if(!chart) return;
                 const len = chart.data.labels.length; if (len === 0) return;
                 const win = Math.floor(len * viewState.zoom); const start = Math.floor(viewState.pan * (len - win));
                 chart.options.scales.x.min = start; chart.options.scales.x.max = start + win;
@@ -1115,7 +953,7 @@
 
                 // Only trigger map highlight if checkbox exists and is checked (Dashboard logic)
                 if (checkboxId && document.getElementById(checkboxId) && document.getElementById(checkboxId).checked) {
-                    this.app.map.highlightRouteSegment(start / len, (start + win) / len);
+                    this.app.map.highlightRouteSegment(start / len, (start + win) / len); 
                 } else if (checkboxId) {
                     this.app.map.clearHighlight();
                 }
@@ -1124,9 +962,9 @@
             updateCharts(data) {
                 // Update both charts
                 [this.plannerChart, this.dashboardChart].forEach(chart => {
-                    if (chart) {
-                        chart.data.labels = data.map((_, i) => i);
-                        chart.data.datasets[0].data = data.map(d => d.elevation);
+                    if(chart) {
+                        chart.data.labels = data.map((_, i) => i); 
+                        chart.data.datasets[0].data = data.map(d => d.elevation); 
                         // Reset view state implied? Usually yes on new data
                     }
                 });
@@ -1141,8 +979,8 @@
                 const totalHours = this.calculateTotalHours();
                 const now = new Date(); now.setSeconds(now.getSeconds() + (totalHours * 3600));
                 const h = Math.floor(totalHours); const m = Math.round((totalHours - h) * 60);
-                document.getElementById('val-ett').innerText = `${h}h ${m.toString().padStart(2, '0')}m`;
-                document.getElementById('val-eta').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('val-ett').innerText = `${h}h ${m.toString().padStart(2,'0')}m`;
+                document.getElementById('val-eta').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             }
 
             calculateTotalHours() {
@@ -1151,7 +989,7 @@
                 const sections = this.store.get('sections');
                 let totalHours = 0;
                 sections.forEach((s, idx) => {
-                    const prevEnd = idx === 0 ? 0 : sections[idx - 1].endRatio;
+                    const prevEnd = idx === 0 ? 0 : sections[idx-1].endRatio;
                     const segmentDistKm = distKm * (s.endRatio - prevEnd);
                     totalHours += segmentDistKm / s.speed;
                 });
@@ -1161,7 +999,7 @@
             updateMetrics() {
                 const totalHours = this.calculateTotalHours();
                 const totalDist = this.store.get('distanceTraveled') || 0;
-                const h = Math.floor(totalHours);
+                const h = Math.floor(totalHours); 
                 const m = Math.round((totalHours - h) * 60);
                 const now = new Date();
                 now.setMinutes(now.getMinutes() + Math.round(totalHours * 60));
@@ -1171,14 +1009,14 @@
                 const etaEl = document.getElementById('adv-eta');
 
                 if (distEl) distEl.innerText = (totalDist / 1000).toFixed(1) + " km";
-                if (timeEl) timeEl.innerText = `${h}h ${m.toString().padStart(2, '0')}m`;
-                if (etaEl) etaEl.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                if (timeEl) timeEl.innerText = `${h}h ${m.toString().padStart(2,'0')}m`;
+                if (etaEl) etaEl.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             }
 
             renderSections() {
                 const container = document.getElementById('sections-container');
                 const sections = this.store.get('sections');
-                const totalDist = this.store.get('distanceTraveled') || 0;
+                const totalDist = this.store.get('distanceTraveled') || 0; 
 
                 // 1. Calculate Metrics
                 this.updateMetrics();
@@ -1189,7 +1027,7 @@
                     const currentEndRatio = s.endRatio;
                     const startKm = ((prevEndRatio * totalDist) / 1000).toFixed(1);
                     const endKm = ((currentEndRatio * totalDist) / 1000).toFixed(1);
-
+                    
                     // --- Clamping Calc for HTML attributes ---
                     // Min Constraint for START handle (idx-1): prev-prev end or 0
                     const minRatioStart = (idx > 1) ? sections[idx - 2].endRatio + 0.01 : 0.00;
@@ -1209,61 +1047,61 @@
                     const canDelete = sections.length > 1;
 
                     return `
-                        <div class="bg-gray-800 p-2 rounded-lg border-l-4 transition-colors hover:border-gray-500 relative" style="border-left-color: ${color}; border-top:1px solid #374151; border-right:1px solid #374151; border-bottom:1px solid #374151;">
-                            <div class="flex justify-between items-center mb-1">
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-bold text-gray-200">Segment ${idx + 1}</span>
-                                        <span class="text-[10px] bg-gray-700 px-1 rounded text-gray-400 border border-gray-600 font-mono">
-                                            <span id="txt-start-${idx}">${startKm}</span> - <span id="txt-end-${idx}">${endKm}</span>km
-                                        </span>
-                                    </div>
-                                </div>
+                    <div class="bg-gray-800 p-2 rounded-lg border-l-4 transition-colors hover:border-gray-500 relative" style="border-left-color: ${color}; border-top:1px solid #374151; border-right:1px solid #374151; border-bottom:1px solid #374151;">
+                        <div class="flex justify-between items-center mb-1">
+                            <div>
                                 <div class="flex items-center gap-2">
-                                    ${canDelete ? `
-                                    <button onclick="app.ui.removeSegment(${idx})" class="text-gray-500 hover:text-red-500 transition-colors p-1" title="Remove Segment">
-                                        <i class="fas fa-trash-alt text-[10px]"></i>
-                                    </button>
-                                    ` : ''}
-                                    <div class="w-2 h-2 rounded-full shadow-sm" style="background-color: ${color}"></div>
+                                    <span class="text-xs font-bold text-gray-200">Segment ${idx + 1}</span>
+                                    <span class="text-[10px] bg-gray-700 px-1 rounded text-gray-400 border border-gray-600 font-mono">
+                                        <span id="txt-start-${idx}">${startKm}</span> - <span id="txt-end-${idx}">${endKm}</span>km
+                                    </span>
                                 </div>
                             </div>
+                            <div class="flex items-center gap-2">
+                                ${canDelete ? `
+                                <button onclick="app.ui.removeSegment(${idx})" class="text-gray-500 hover:text-red-500 transition-colors p-1" title="Remove Segment">
+                                    <i class="fas fa-trash-alt text-[10px]"></i>
+                                </button>
+                                ` : ''}
+                                <div class="w-2 h-2 rounded-full shadow-sm" style="background-color: ${color}"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="px-1">
+                                <div class="range-slider-wrapper">
+                                    <div class="range-slider-track"></div>
+                                    <div id="highlight-${idx}" class="range-slider-highlight" style="left: ${leftPercent}%; width: ${widthPercent}%; background-color: ${color}"></div>
+                                    
+                                    <!-- Left Handle (Start): Controls boundary at idx-1 -->
+                                    <input type="range" step="0.001" min="0" max="1" value="${prevEndRatio}" id="slider-start-${idx}" oninput="app.ui.updateBoundary(${idx-1}, this.value, true)" onchange="app.ui.renderSections()" class="range-input ${isFirst ? 'locked' : ''}" ${isFirst ? 'disabled' : ''}>
 
-                            <div class="space-y-2">
-                                <div class="px-1">
-                                    <div class="range-slider-wrapper">
-                                        <div class="range-slider-track"></div>
-                                        <div id="highlight-${idx}" class="range-slider-highlight" style="left: ${leftPercent}%; width: ${widthPercent}%; background-color: ${color}"></div>
-
-                                        <!-- Left Handle (Start): Controls boundary at idx-1 -->
-                                        <input type="range" step="0.001" min="0" max="1" value="${prevEndRatio}" id="slider-start-${idx}" oninput="app.ui.updateBoundary(${idx - 1}, this.value, true)" onchange="app.ui.renderSections()" class="range-input ${isFirst ? 'locked' : ''}" ${isFirst ? 'disabled' : ''}>
-
-                                        <!-- Right Handle (End): Controls boundary at idx -->
-                                        <input type="range" step="0.001" min="0" max="1" value="${currentEndRatio}" id="slider-end-${idx}" oninput="app.ui.updateBoundary(${idx}, this.value, false)" onchange="app.ui.renderSections()" class="range-input ${isLast ? 'locked' : ''}" ${isLast ? 'disabled' : ''}>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2 p-1 bg-gray-900/50 rounded border border-gray-700/50">
-                                    <span class="text-[10px] font-semibold text-gray-400 whitespace-nowrap">Target Ave. Speed</span>
-                                    <input type="range" min="10" max="60" value="${s.speed}" oninput="document.getElementById('lbl-speed-${idx}').innerText = this.value; app.ui.updateSectionSpeed(${idx}, this.value)" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer speed-slider" style="accent-color: ${color}">
-                                    <span class="text-[10px] font-mono text-white whitespace-nowrap w-12 text-right"><span id="lbl-speed-${idx}">${s.speed}</span> km/h</span>
+                                    <!-- Right Handle (End): Controls boundary at idx -->
+                                    <input type="range" step="0.001" min="0" max="1" value="${currentEndRatio}" id="slider-end-${idx}" oninput="app.ui.updateBoundary(${idx}, this.value, false)" onchange="app.ui.renderSections()" class="range-input ${isLast ? 'locked' : ''}" ${isLast ? 'disabled' : ''}>
                                 </div>
                             </div>
-                        </div>`;
+                            <div class="flex items-center gap-2 p-1 bg-gray-900/50 rounded border border-gray-700/50">
+                                <span class="text-[10px] font-semibold text-gray-400 whitespace-nowrap">Target Ave. Speed</span>
+                                <input type="range" min="10" max="60" value="${s.speed}" oninput="document.getElementById('lbl-speed-${idx}').innerText = this.value; app.ui.updateSectionSpeed(${idx}, this.value)" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer speed-slider" style="accent-color: ${color}">
+                                <span class="text-[10px] font-mono text-white whitespace-nowrap w-12 text-right"><span id="lbl-speed-${idx}">${s.speed}</span> km/h</span>
+                            </div>
+                        </div>
+                    </div>`;
                 }).join('');
 
                 // 3. Update Map - Use injected dependency
                 this.app.map.drawSegments(sections);
                 // 4. Update Chart Colors if open
-                if (this.plannerChart) this.plannerChart.update();
-                if (this.dashboardChart) this.dashboardChart.update();
+                if(this.plannerChart) this.plannerChart.update();
+                if(this.dashboardChart) this.dashboardChart.update();
             }
-
+            
             removeSegment(idx) {
                 const sections = this.store.get('sections');
                 if (sections.length <= 1) return; // Prevent deleting the last remaining segment
 
                 sections.splice(idx, 1);
-
+                
                 // Ensure the new last segment ends at 1.0 (100% of route)
                 // This handles cases where we deleted the last segment, or any middle segment
                 sections[sections.length - 1].endRatio = 1.0;
@@ -1283,7 +1121,7 @@
             updateBoundary(boundaryIndex, newVal, isStartSlider) {
                 const sections = this.store.get('sections');
                 const totalDist = this.store.get('distanceTraveled') || 0;
-
+                
                 // --- 1. Clamping Logic ---
                 const minConstraint = (boundaryIndex > 0) ? sections[boundaryIndex - 1].endRatio + 0.01 : 0.01;
                 const maxConstraint = (boundaryIndex < sections.length - 2) ? sections[boundaryIndex + 1].endRatio - 0.01 : 0.99;
@@ -1294,29 +1132,29 @@
 
                 // --- 2. Update Data ---
                 sections[boundaryIndex].endRatio = clampedVal;
-
+                
                 const ratio = clampedVal;
                 const kmVal = ((ratio * totalDist) / 1000).toFixed(1);
 
                 // --- 3. Update UI Elements ---
-                if (document.getElementById(`txt-start-${boundaryIndex + 1}`)) document.getElementById(`txt-start-${boundaryIndex + 1}`).innerText = kmVal;
-                if (document.getElementById(`txt-end-${boundaryIndex}`)) document.getElementById(`txt-end-${boundaryIndex}`).innerText = kmVal;
+                if(document.getElementById(`txt-start-${boundaryIndex + 1}`)) document.getElementById(`txt-start-${boundaryIndex + 1}`).innerText = kmVal;
+                if(document.getElementById(`txt-end-${boundaryIndex}`)) document.getElementById(`txt-end-${boundaryIndex}`).innerText = kmVal;
 
                 // Force the input elements to match clamped value (prevents dragging past limit)
                 const endHandle = document.getElementById(`slider-end-${boundaryIndex}`);
-                if (endHandle) endHandle.value = clampedVal;
-
+                if(endHandle) endHandle.value = clampedVal;
+                
                 const startHandle = document.getElementById(`slider-start-${boundaryIndex + 1}`);
-                if (startHandle) startHandle.value = clampedVal;
+                if(startHandle) startHandle.value = clampedVal;
 
                 // --- 4. Update Highlight Bars ---
                 // Current Segment (Expanding/Shrinking End)
                 const prevEndRatio = boundaryIndex === 0 ? 0 : sections[boundaryIndex - 1].endRatio;
                 const left1 = prevEndRatio * 100;
                 const width1 = (ratio - prevEndRatio) * 100;
-
+                
                 const bar1 = document.getElementById(`highlight-${boundaryIndex}`);
-                if (bar1) {
+                if(bar1) {
                     bar1.style.left = `${left1}%`;
                     bar1.style.width = `${width1}%`;
                 }
@@ -1326,20 +1164,20 @@
                     const nextEndRatio = sections[boundaryIndex + 1].endRatio;
                     const left2 = ratio * 100;
                     const width2 = (nextEndRatio - ratio) * 100;
-
+                    
                     const bar2 = document.getElementById(`highlight-${boundaryIndex + 1}`);
-                    if (bar2) {
+                    if(bar2) {
                         bar2.style.left = `${left2}%`;
                         bar2.style.width = `${width2}%`;
                     }
                 }
-
+                
                 // 5. Update Chart Colors on drag (optional, but nice)
-                if (this.plannerChart) this.plannerChart.update('none'); // 'none' mode for performance
+                if(this.plannerChart) this.plannerChart.update('none'); // 'none' mode for performance
 
                 // 6. Update Map Real-time
                 this.app.map.drawSegments(sections);
-
+                
                 // 7. Update Metrics
                 this.updateMetrics();
             }
@@ -1366,7 +1204,7 @@
                 URL.revokeObjectURL(url);
                 this.showToast(`Plan "${filename}.json" saved successfully!`);
             }
-
+            
             async loadPlan(data) {
                 if (!data.startPoint || !data.endPoint || !data.sections) {
                     this.showModal({ title: 'Error', message: 'Invalid plan file structure.', type: 'alert' });
@@ -1377,7 +1215,7 @@
                 this.app.map.markers.start = null;
                 this.app.map.markers.end = null;
                 this.app.map.clearWaypoints();
-
+                
                 this.store.update('startPoint', data.startPoint);
                 this.store.update('endPoint', data.endPoint);
                 this.store.update('waypoints', data.waypoints || []);
@@ -1396,7 +1234,7 @@
                 this.hideLoading();
                 this.showToast("Plan loaded successfully!");
             }
-
+            
             // --- GEMINI AI ANALYZER ---
             async analyzePlan() {
                 const route = this.store.get('routeGeometry');
@@ -1429,13 +1267,13 @@
                     const startKm = (prevEndRatio * totalDist);
                     const endKm = (s.endRatio * totalDist);
                     const lengthKm = (endKm - startKm).toFixed(1);
-
+                    
                     // Simple elevation check for the segment (using just start/end elevation if available)
                     let elevInfo = "";
                     if (elevationData && elevationData.length > 0) {
                         const startIdx = Math.floor(prevEndRatio * elevationData.length);
                         const endIdx = Math.floor(s.endRatio * elevationData.length);
-                        if (elevationData[startIdx] && elevationData[endIdx]) {
+                        if(elevationData[startIdx] && elevationData[endIdx]) {
                             const segStartElev = elevationData[startIdx].elevation.toFixed(0);
                             const segEndElev = elevationData[endIdx].elevation.toFixed(0);
                             const netChange = segEndElev - segStartElev;
@@ -1448,11 +1286,11 @@
 
                 // --- 2. Construct Prompt for Gemini ---
                 const systemPrompt = "You are an expert cycling coach. Analyze the user's route segments based on length, target speed, and elevation changes. Provide a friendly, concise, and constructive critique (2-3 sentences max) on the pacing strategy. Highlight any segments that appear overly challenging or too easy given the terrain.";
-
+                
                 const userQuery = `Analyze the following planned cycling route. The segments are defined by their target speed and length along the route. Focus on whether the target speeds are reasonable based on the elevation notes. ${elevationSummary}\n\n${planDetails}`;
 
                 try {
-                    const apiKey = "";
+                    const apiKey = ""; 
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
                     const payload = {
@@ -1472,14 +1310,14 @@
                     const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text || "Analysis failed to generate content.";
 
                     document.getElementById('ai-analysis').innerHTML = `
-                            <p class="text-white font-bold mb-1">AI Coach Feedback:</p>
-                            <p class="text-gray-300 italic">${aiResponse}</p>`;
+                        <p class="text-white font-bold mb-1">AI Coach Feedback:</p>
+                        <p class="text-gray-300 italic">${aiResponse}</p>`;
 
                 } catch (error) {
                     console.error("Gemini API Error:", error);
                     document.getElementById('ai-analysis').innerHTML = `
-                            <p class="text-red-400 font-bold">AI Analysis Failed:</p>
-                            <p class="text-gray-400">Could not connect to the coaching service. Check your connection or plan details.</p>`;
+                        <p class="text-red-400 font-bold">AI Analysis Failed:</p>
+                        <p class="text-gray-400">Could not connect to the coaching service. Check your connection or plan details.</p>`;
                 } finally {
                     this.hideLoading();
                 }
@@ -1494,10 +1332,10 @@
                 this.route = new RouteService(this.store);
                 this.ride = new RideManager(this); // Pass 'this' as app
                 this.ui = new UIManager(this); // Pass 'this' as app
-
+                
                 // FIX: Expose app globally for inline HTML event handlers
                 window.app = this;
-
+                
                 this.initListeners();
                 this.ui.renderSections();
             }
@@ -1511,7 +1349,7 @@
                 document.getElementById('input-gpx').addEventListener('change', (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
-
+                    
                     this.ui.showLoading("Parsing GPX File...");
 
                     const reader = new FileReader();
@@ -1521,7 +1359,7 @@
                             const parser = new DOMParser();
                             const xmlDoc = parser.parseFromString(text, "text/xml");
                             const trkpts = xmlDoc.getElementsByTagName("trkpt");
-
+                            
                             if (trkpts.length < 2) {
                                 this.ui.showToast("Invalid GPX file: No track points found.");
                                 return;
@@ -1537,35 +1375,35 @@
                             this.ui.showLoading("Drawing Route on Map...");
 
                             this.store.update('routeGeometry', latlngs);
-
+                            
                             let dist = 0;
-                            for (let i = 0; i < latlngs.length - 1; i++) {
-                                dist += this.map.map.distance(latlngs[i], latlngs[i + 1]);
+                            for(let i=0; i<latlngs.length-1; i++) {
+                                dist += this.map.map.distance(latlngs[i], latlngs[i+1]);
                             }
                             this.store.update('distanceTraveled', dist); // meters
 
                             const start = { lat: latlngs[0][0], lng: latlngs[0][1] };
-                            const end = { lat: latlngs[latlngs.length - 1][0], lng: latlngs[latlngs.length - 1][1] };
-
+                            const end = { lat: latlngs[latlngs.length-1][0], lng: latlngs[latlngs.length-1][1] };
+                            
                             this.ui.showLoading("Resolving Addresses...");
                             const startData = await this.route.resolvePoint(start);
                             const endData = await this.route.resolvePoint(end);
-
+                            
                             this.store.update('startPoint', startData);
                             this.store.update('endPoint', endData);
                             this.map.addMarker('start', start);
                             this.map.addMarker('end', end);
-
+                            
                             this.store.update('waypoints', []);
                             this.ui.renderWaypoints();
 
                             this.map.drawRoute(latlngs);
-
+                            
                             this.ui.showLoading("Fetching Elevation Data...");
                             await this.route.getElevation(latlngs);
-
+                            
                             this.store.update('sections', [{ id: 1, speed: 25, endRatio: 1.0 }]);
-
+                            
                             document.getElementById('btn-next-step').classList.remove('hidden');
                             this.ui.renderSections();
                         } catch (err) {
@@ -1578,7 +1416,7 @@
                     reader.readAsText(file);
                     e.target.value = ''; // Reset input
                 });
-
+                
                 // File Upload Listener (JSON)
                 document.getElementById('input-json').addEventListener('change', (e) => {
                     const file = e.target.files[0];
@@ -1604,8 +1442,8 @@
                         const input = settingStart ? 'input-start' : 'input-end';
                         document.getElementById(input).value = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
                         this.map.addMarker(settingStart ? 'start' : 'end', e.latlng);
-                        if (settingStart) this.store.update('startPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
-                        else this.store.update('endPoint', { lat: e.latlng.lat, lng: e.latlng.lng });
+                        if(settingStart) this.store.update('startPoint', {lat: e.latlng.lat, lng: e.latlng.lng});
+                        else this.store.update('endPoint', {lat: e.latlng.lat, lng: e.latlng.lng});
                         settingStart = !settingStart;
                     }
                 });
@@ -1617,18 +1455,18 @@
                         this.ui.showModal({ title: 'Error', message: 'Select Start and End points first.', type: 'alert' });
                         return;
                     }
-
+                    
                     document.getElementById('btn-calc-route').innerText = "Calculating...";
                     try {
                         const coords = await this.route.getRoute(s, e);
                         this.map.drawRoute(coords);
                         document.getElementById('btn-calc-route').innerText = "Check Route";
-
+                        
                         document.getElementById('btn-next-step').classList.remove('hidden');
-
+                        
                         this.store.update('sections', [{ id: 1, speed: 25, endRatio: 1.0 }]);
                         this.ui.renderSections();
-                    } catch (err) {
+                    } catch(err) {
                         this.ui.showModal({ title: 'Error', message: "Could not find route. " + err.message, type: 'alert' });
                         document.getElementById('btn-calc-route').innerText = "Check Route";
                     }
@@ -1638,14 +1476,14 @@
                     const sections = this.store.get('sections');
                     const lastIdx = sections.length - 1;
                     const prevEndRatio = lastIdx === 0 ? 0 : sections[lastIdx - 1].endRatio;
-                    const currentEndRatio = 1.0;
+                    const currentEndRatio = 1.0; 
                     const midRatio = prevEndRatio + ((currentEndRatio - prevEndRatio) / 2);
                     sections[lastIdx].endRatio = parseFloat(midRatio.toFixed(3));
                     sections.push({ id: sections.length + 1, speed: 25, endRatio: 1.0 });
                     this.store.update('sections', sections);
                     this.ui.renderSections();
                 };
-
+                
                 // Save Button Logic
                 document.getElementById('btn-save-plan').onclick = () => {
                     const route = this.store.get('routeGeometry');
@@ -1655,7 +1493,7 @@
                     }
                     this.ui.promptFilename(this.ui.savePlanAsJson.bind(this.ui));
                 };
-
+                
                 // LLM Analysis Button
                 document.getElementById('btn-ai-analyze').onclick = () => this.ui.analyzePlan();
 
@@ -1664,11 +1502,11 @@
                 document.getElementById('btn-ride-toggle').onclick = () => this.ride.toggleRide();
                 document.getElementById('btn-ride-cancel').onclick = () => {
                     const status = this.store.get('rideStatus');
-                    if (status === 'idle') this.ui.showModal({ title: 'Discard?', message: 'Discard plan?', type: 'confirm', onConfirm: () => this.ui.togglePanel('planner') });
+                    if(status === 'idle') this.ui.showModal({ title: 'Discard?', message: 'Discard plan?', type: 'confirm', onConfirm: () => this.ui.togglePanel('planner') });
                     else this.ui.showModal({ title: 'Finish?', message: 'Stop ride?', type: 'confirm', confirmText: 'Stop', onConfirm: () => { this.ride.stopRide(); this.ui.togglePanel('planner'); } });
                 };
                 document.getElementById('btn-fullscreen').onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else if (document.exitFullscreen) document.exitFullscreen(); };
-
+                
                 setTimeout(() => this.ui.togglePanel('planner'), 500);
             }
 
@@ -1693,16 +1531,16 @@
                                     input.value = place.display_name;
                                     list.classList.add('hidden');
                                     const lat = parseFloat(place.lat); const lng = parseFloat(place.lon);
-
-                                    if (stateKey.startsWith('waypoint-')) {
+                                    
+                                    if(stateKey.startsWith('waypoint-')) {
                                         const idx = parseInt(stateKey.split('-')[1]);
                                         const wps = [...this.store.get('waypoints')];
-                                        wps[idx] = { lat, lng, address: place.display_name };
+                                        wps[idx] = {lat, lng, address: place.display_name};
                                         this.store.update('waypoints', wps);
-                                        this.map.addMarker('waypoint', { lat, lng }, idx);
+                                        this.map.addMarker('waypoint', {lat, lng}, idx);
                                     } else {
-                                        this.map.addMarker(stateKey === 'startPoint' ? 'start' : 'end', { lat, lng });
-                                        this.store.update(stateKey, { lat, lng, address: place.address });
+                                        this.map.addMarker(stateKey === 'startPoint' ? 'start' : 'end', {lat, lng});
+                                        this.store.update(stateKey, {lat, lng, address: place.address});
                                     }
                                     this.map.map.panTo([lat, lng]);
                                 };
