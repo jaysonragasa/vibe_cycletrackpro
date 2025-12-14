@@ -838,7 +838,12 @@
                 }
             }
 
-            finalizePlan() { this.togglePanel('dashboard'); document.getElementById('bubble-dashboard').classList.remove('hidden'); this.calculateDashboardETA(); }
+            finalizePlan() { 
+                // Only show dashboard after completing advanced planning
+                document.getElementById('bubble-dashboard').classList.remove('hidden'); 
+                this.togglePanel('dashboard'); 
+                this.calculateDashboardETA(); 
+            }
 
             renderUpdate(key, val) {
                 if (key === 'startPoint' && val && val.address) {
@@ -1474,7 +1479,7 @@
                         this.map.drawRoute(coords);
                         document.getElementById('btn-calc-route').innerText = "Check Route";
 
-                        // Show Next Button
+                        // Show Next Button, keep dashboard hidden until advanced planning
                         document.getElementById('btn-next-step').classList.remove('hidden');
 
                         this.store.update('sections', [{ id: 1, speed: 25, endRatio: 1.0 }]);
@@ -1507,6 +1512,8 @@
                 };
                 document.getElementById('btn-fullscreen').onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else if (document.exitFullscreen) document.exitFullscreen(); };
 
+                // Hide dashboard bubble initially
+                document.getElementById('bubble-dashboard').classList.add('hidden');
                 setTimeout(() => this.ui.togglePanel('planner'), 500);
             }
 
