@@ -236,7 +236,7 @@
             <button onclick="app.ui.togglePanel('planner')" class="w-14 h-14 bg-blue-600 rounded-full shadow-xl flex items-center justify-center border-2 border-white/20 active:scale-90 transition-transform">
                 <i class="fas fa-map-signs text-xl"></i>
             </button>
-            <button onclick="app.ui.togglePanel('dashboard')" id="bubble-dashboard" class="hidden w-14 h-14 bg-green-600 rounded-full shadow-xl flex items-center justify-center border-2 border-white/20 active:scale-90 transition-transform">
+            <button onclick="app.ui.togglePanel('dashboard')" id="bubble-dashboard" class="w-14 h-14 bg-green-600 rounded-full shadow-xl items-center justify-center border-2 border-white/20 active:scale-90 transition-transform" style="display: none;">
                 <i class="fas fa-tachometer-alt text-xl"></i>
             </button>
         </div>
@@ -840,7 +840,7 @@
 
             finalizePlan() { 
                 // Only show dashboard after completing advanced planning
-                document.getElementById('bubble-dashboard').classList.remove('hidden'); 
+                document.getElementById('bubble-dashboard').style.display = 'flex'; 
                 this.togglePanel('dashboard'); 
                 this.calculateDashboardETA(); 
             }
@@ -1512,8 +1512,7 @@
                 };
                 document.getElementById('btn-fullscreen').onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else if (document.exitFullscreen) document.exitFullscreen(); };
 
-                // Hide dashboard bubble initially
-                document.getElementById('bubble-dashboard').classList.add('hidden');
+                // Dashboard bubble already hidden with inline style
                 setTimeout(() => this.ui.togglePanel('planner'), 500);
             }
 
