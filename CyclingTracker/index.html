@@ -722,7 +722,7 @@
                     if (this.store.get('currentSpeed') > 2) this.store.update('movingTime', this.store.get('movingTime') + delta);
                 }, 1000);
             }
-            pause() { this.store.update('rideStatus', 'paused'); clearInterval(this.timerId); this.releaseWakeLock(); }
+            pause() { this.store.update('rideStatus', 'paused'); clearInterval(this.timerId); }
             async requestWakeLock() {
                 if ('wakeLock' in navigator) {
                     try {
