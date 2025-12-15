@@ -690,8 +690,8 @@
                 this.app = app; this.store = app.store;
                 this.watchId = null; this.timerId = null; this.lastTime = null;
                 this.wakeLock = null;
-                this.totalDistance = 0;
-                this.lastPosition = null;
+                this.speedSum = 0;
+                this.speedCount = 0;
             }
             toggleRide() {
                 const status = this.store.get('rideStatus');
@@ -702,8 +702,8 @@
                 if (this.watchId) navigator.geolocation.clearWatch(this.watchId);
                 if (this.timerId) clearInterval(this.timerId);
                 this.watchId = null; this.timerId = null;
-                this.totalDistance = 0;
-                this.lastPosition = null;
+                this.speedSum = 0;
+                this.speedCount = 0;
                 this.releaseWakeLock();
                 this.app.map.disableNavigationMode();
             }
@@ -746,15 +746,10 @@
                 const speedKmh = (speed || 0) * 3.6;
                 this.store.update('currentSpeed', speedKmh);
                 
-                if (this.lastPosition) {
-                    const distance = this.app.map.map.distance([this.lastPosition.lat, this.lastPosition.lng], [latitude, longitude]);
-                    this.totalDistance += distance;
-                }
-                this.lastPosition = { lat: latitude, lng: longitude };
-                
-                const movingTime = this.store.get('movingTime');
-                if (movingTime > 0) {
-                    const avgSpeed = (this.totalDistance / 1000) / (movingTime / 3600);
+                if (speedKmh > 2) {
+                    this.speedSum += speedKmh;
+                    this.speedCount++;
+                    const avgSpeed = this.speedSum / this.speedCount;
                     this.store.update('avgSpeed', avgSpeed);
                 }
                 
